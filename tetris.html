@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SHAPE UP</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: #000;
+            font-family: monospace;
+            overflow: hidden;
+        }
+        #game-container {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            position: relative;
+            padding-right: 50px;
+            padding-bottom: 60px;
+        }
+        #game-canvas {
+            background: #111;
+            border: 2px solid #fff;
+            max-width: 90vw;
+            max-height: 90vh;
+            width: 400px;
+            height: 200px;
+            touch-action: none;
+        }
+        #score { display: none; }
+        #controls {
+            display: flex;
+            flex-direction: column;
+            margin-left: 30px;
+            margin-right: 10px;
+        }
+        button {
+            padding: 5px 15px;
+            font-size: 16px;
+            margin: 5px 0;
+            background: #fff;
+            border: none;
+            cursor: pointer;
+            min-width: 100px;
+        }
+        button:active { background: #ccc; }
+        #teleport-btn {
+            background: #F0F;
+            color: #fff;
+            font-weight: bold;
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 5px 15px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            z-index: 20;
+        }
+        #teleport-btn.fullscreen-teleport {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            left: auto;
+            transform: none;
+        }
+        #start-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            z-index: 10;
+        }
+        #settings-button {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 20;
+        }
+        #settings-menu {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            z-index: 30;
+            display: none;
+            text-align: center;
+        }
+        #settings-menu button {
+            display: block;
+            margin: 10px auto;
+            padding: 5px 15px;
+            font-size: 16px;
+            background: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        #settings-menu button:active {
+            background: #ccc;
+        }
+        @media (min-width: 600px) {
+            #game-canvas { transform: scale(1.2); transform-origin: center; }
+        }
+        :fullscreen #game-canvas,
+        :-webkit-full-screen #game-canvas {
+            width: 100vw;
+            height: 100vh;
+            max-width: none;
+            max-height: none;
+            transform: none;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="game-canvas" width="400" height="200"></canvas>
+        <div id="start-overlay"></div>
+        <div id="settings-button">⚙️</div>
+        <div id="settings-menu" style="display: none;">
+            <button id="pause-btn">Pause</button>
+            <button id="fullscreen-btn">Full Screen</button>
+            <button id="instructions-btn">Instructions</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+        const gridSize = 20;
+        const cols = 20; // Fixed number of columns
+        const rows = 10; // Fixed number of rows
+        let board = Array(rows).fill().map(() => Array(cols).fill(0));
+        let score = 0;
+        let gameOver = false;
+        let paused = false;
+        let gameStarted = false;
+
+        const shapes = [
+            [[1,1,1,1]], [[1,1],[1,1]], [[1,1,1],[0,1,0]], [[1,1,1],[1,0,0]],
+            [[1,1,1],[0,0,1]], [[1,1,0],[0,1,1]], [[0,1,1],[1,1,0]]
+        ];
+        const colors = ['#FF0', '#0FF', '#F0F', '#00F', '#F00', '#0F0', '#FFA500'];
+
+        let currentPiece = null;
+        let dropCounter = 0;
+        let dropInterval = 1000;
+        let fastDropInterval = 200;
+        let speedHeldTime = 0;
+        const teleportThreshold = 500;
+        let speedPressed = false;
+        let wiggleTime = 0;
+        let poppingFragments = [];
+        let titleTimer = 2000;
+        let lastRotateTime = 0;
+        let titlePopPlayed = false;
+
+        let audioCtx = null;
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                console.log('Audio context initialized');
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume().then(() => console.log('Audio context resumed'));
+            }
+        }
+        function playPop() {
+            if (!audioCtx) {
+                console.log('Audio not initialized yet');
+                return;
+            }
+            console.log('Playing pop sound');
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.value = 800;
+            gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.2);
+        }
+
+        const startOverlay = document.getElementById('start-overlay');
+        const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        startOverlay.textContent = isTouchDevice ? 'Tap to Play' : 'Press any key to Play';
+
+        if (isTouchDevice) {
+            const teleportBtn = document.createElement('button');
+            teleportBtn.id = 'teleport-btn';
+            teleportBtn.textContent = 'Teleport';
+            document.getElementById('game-container').appendChild(teleportBtn);
+        }
+
+        const settingsButton = document.getElementById('settings-button');
+        const settingsMenu = document.getElementById('settings-menu');
+
+        settingsButton.addEventListener('click', () => {
+            settingsMenu.style.display = settingsMenu.style.display === 'none' ? 'block' : 'none';
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!settingsMenu.contains(e.target) && e.target !== settingsButton) {
+                settingsMenu.style.display = 'none';
+            }
+        });
+
+        function startGame() {
+            if (gameStarted) return;
+            initAudio();
+            startOverlay.style.display = 'none';
+            gameStarted = true;
+            adjustCanvasResolution();
+            board = Array(rows).fill().map(() => Array(cols).fill(0));
+            currentPiece = newPiece();
+            draw();
+            requestAnimationFrame(updateLoop);
+        }
+
+        startOverlay.addEventListener('click', startGame);
+        startOverlay.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            initAudio();
+            if (!gameStarted) startGame();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (!gameStarted) startGame();
+        });
+
+        function adjustCanvasResolution() {
+            const dpr = window.devicePixelRatio || 1;
+            if (document.fullscreenElement || document.webkitFullscreenElement) {
+                canvas.width = window.innerWidth * dpr;
+                canvas.height = window.innerHeight * dpr;
+            } else {
+                canvas.width = 400 * dpr;
+                canvas.height = 200 * dpr;
+                canvas.style.transform = '';
+            }
+            canvas.style.width = `${canvas.width / dpr}px`;
+            canvas.style.height = `${canvas.height / dpr}px`;
+
+            // Calculate scaling to fit the game board
+            const logicalWidth = canvas.width / dpr;
+            const logicalHeight = canvas.height / dpr;
+            const gameWidth = cols * gridSize;
+            const gameHeight = rows * gridSize;
+            const scale = Math.min(logicalWidth / gameWidth, logicalHeight / gameHeight);
+
+            // Reset transform and apply scaling
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(scale * dpr, scale * dpr);
+
+            // Translate to center the game board if necessary
+            const offsetX = (logicalWidth - gameWidth * scale) / 2;
+            const offsetY = (logicalHeight - gameHeight * scale) / 2;
+            ctx.translate(offsetX, offsetY);
+
+            if (gameStarted) {
+                draw();
+            }
+
+            // Adjust teleport button position for touchscreens
+            if (isTouchDevice) {
+                const teleportBtn = document.getElementById('teleport-btn');
+                if (document.fullscreenElement || document.webkitFullscreenElement) {
+                    teleportBtn.classList.add('fullscreen-teleport');
+                } else {
+                    teleportBtn.classList.remove('fullscreen-teleport');
+                }
+            }
+        }
+
+        function newPiece() {
+            const shapeIdx = Math.floor(Math.random() * shapes.length);
+            return {
+                shape: shapes[shapeIdx],
+                color: colors[shapeIdx],
+                x: Math.floor(cols / 2) - 2,
+                y: rows - 1
+            };
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (titleTimer > 0) drawTitle();
+            drawBoard();
+            if (currentPiece) drawPiece(currentPiece);
+            drawPoppingFragments();
+            wiggleTime += 0.05;
+            if (titleTimer > 0) titleTimer -= 16;
+
+            // Draw score in bottom-right corner
+            const dpr = window.devicePixelRatio || 1;
+            const logicalWidth = canvas.width / dpr;
+            const logicalHeight = canvas.height / dpr;
+            ctx.save();
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.fillStyle = '#FFF';
+            ctx.font = '16px monospace';
+            ctx.textAlign = 'right';
+            ctx.fillText(`Score: ${score}`, logicalWidth - 10, logicalHeight - 10);
+            ctx.restore();
+        }
+
+        function drawTitle() {
+            const title = "SHAPE UP";
+            const balloonSize = gridSize / 4;
+            const dpr = window.devicePixelRatio || 1;
+            const startX = ((canvas.width / dpr) - (title.length * gridSize * 2.2)) / 2;
+            const startY = 20;
+            const letterShapes = [
+                [[1,1,1,1],[1,0,0,0],[1,1,1,1],[0,0,0,1],[1,1,1,1]], // S
+                [[1,0,0,1],[1,0,0,1],[1,1,1,1],[1,0,0,1],[1,0,0,1]], // H
+                [[1,1,1,1],[1,0,0,1],[1,1,1,1],[1,0,0,1],[1,0,0,1]], // A
+                [[1,1,1,1],[1,0,0,1],[1,1,1,1],[1,0,0,0],[1,0,0,0]], // P (SHAPE)
+                [[1,1,1,1],[1,0,0,0],[1,1,1,1],[1,0,0,0],[1,1,1,1]], // E
+                [[0,0,0,0]], // Space
+                [[1,0,0,1],[1,0,0,1],[1,0,0,1],[1,0,0,1],[1,1,1,1]], // U
+                [[1,1,1,1],[1,0,0,1],[1,1,1,1],[1,0,0,0],[1,0,0,0]]  // P (UP)
+            ];
+
+            for (let i = 0; i < title.length; i++) {
+                const shape = letterShapes[i];
+                shape.forEach((row, r) => {
+                    row.forEach((val, c) => {
+                        if (val) {
+                            ctx.fillStyle = colors[(i + 1) % colors.length];
+                            ctx.beginPath();
+                            ctx.arc(
+                                startX + (i * gridSize * 2.2) + c * gridSize / 2,
+                                startY + r * gridSize / 2,
+                                balloonSize,
+                                0,
+                                Math.PI * 2
+                            );
+                            ctx.fill();
+                            ctx.strokeStyle = '#FFF';
+                            ctx.lineWidth = 1;
+                            ctx.stroke();
+                            if (titleTimer < 500 && Math.random() < 0.05) {
+                                for (let j = 0; j < 6; j++) {
+                                    const angle = Math.random() * Math.PI * 2;
+                                    const speed = 1 + Math.random() * 2;
+                                    poppingFragments.push({
+                                        x: startX + (i * gridSize * 2.2) + c * gridSize / 2,
+                                        y: startY + r * gridSize / 2,
+                                        vx: Math.cos(angle) * speed,
+                                        vy: Math.sin(angle) * speed,
+                                        color: colors[(i + 1) % colors.length],
+                                        time: 500
+                                    });
+                                }
+                                if (!titlePopPlayed && titleTimer <= 500) {
+                                    playPop();
+                                    titlePopPlayed = true;
+                                }
+                            }
+                        }
+                    });
+                });
+            }
+        }
+
+        function drawBoard() {
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    if (board[r][c]) {
+                        ctx.fillStyle = board[r][c];
+                        ctx.beginPath();
+                        ctx.arc(c * gridSize + gridSize / 2, r * gridSize + gridSize / 2, gridSize / 2 - 1, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.strokeStyle = '#FFF';
+                        ctx.lineWidth = 1;
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        function drawPoppingFragments() {
+            poppingFragments = poppingFragments.filter(f => f.time > 0);
+            poppingFragments.forEach(fragment => {
+                ctx.globalAlpha = fragment.time / 500;
+                ctx.fillStyle = fragment.color;
+                ctx.beginPath();
+                ctx.arc(fragment.x, fragment.y, gridSize / 6, 0, Math.PI * 2);
+                ctx.fill();
+                fragment.x += fragment.vx;
+                fragment.y += fragment.vy;
+                fragment.time -= 16;
+            });
+            ctx.globalAlpha = 1;
+        }
+
+        function drawPiece(piece) {
+            ctx.fillStyle = piece.color;
+            ctx.strokeStyle = '#FFF';
+            ctx.lineWidth = 1;
+            let lowestPoints = [];
+
+            piece.shape.forEach((row, r) => {
+                row.forEach((val, c) => {
+                    if (val) {
+                        const x = (piece.x + c) * gridSize + gridSize / 2;
+                        const y = (piece.y - r) * gridSize + gridSize / 2;
+                        ctx.beginPath();
+                        ctx.arc(x, y, gridSize / 2 - 1, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.stroke();
+                        ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+                        ctx.beginPath();
+                        ctx.arc(x - gridSize / 4, y - gridSize / 2, gridSize / 6, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.fillStyle = piece.color;
+
+                        if (!lowestPoints[c] || (piece.y - r) > lowestPoints[c].y) {
+                            lowestPoints[c] = { x: piece.x + c, y: piece.y - r };
+                        }
+                    }
+                });
+            });
+
+            ctx.strokeStyle = '#888';
+            ctx.lineWidth = 1.5;
+            lowestPoints.forEach(point => {
+                if (point) {
+                    const startX = point.x * gridSize + gridSize / 2;
+                    const startY = point.y * gridSize + gridSize;
+                    const endY = startY + gridSize * 2;
+                    const wiggle1 = Math.sin(wiggleTime) * (gridSize / 3);
+                    const wiggle2 = Math.sin(wiggleTime + Math.PI) * (gridSize / 3);
+
+                    ctx.beginPath();
+                    ctx.moveTo(startX, startY);
+                    ctx.bezierCurveTo(
+                        startX + wiggle1, startY + gridSize * 0.66,
+                        startX + wiggle2, startY + gridSize * 1.33,
+                        startX, endY
+                    );
+                    ctx.stroke();
+                }
+            });
+        }
+
+        function collide(piece) {
+            for (let r = 0; r < piece.shape.length; r++) {
+                for (let c = 0; c < piece.shape[r].length; c++) {
+                    if (!piece.shape[r][c]) continue;
+                    let newX = piece.x + c;
+                    let newY = piece.y - r;
+                    if (newY < 0 || newX < 0 || newX >= cols || newY >= rows || board[newY][newX]) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        function merge(piece) {
+            piece.shape.forEach((row, r) => {
+                row.forEach((val, c) => {
+                    if (val) {
+                        board[piece.y - r][piece.x + c] = piece.color;
+                    }
+                });
+            });
+        }
+
+        function clearRows() {
+            let linesCleared = 0;
+            for (let r = rows - 1; r >= 0; r--) {
+                let isFull = true;
+                for (let c = 0; c < cols; c++) {
+                    if (!board[r][c]) {
+                        isFull = false;
+                        break;
+                    }
+                }
+                if (isFull) {
+                    for (let c = 0; c < cols; c++) {
+                        const centerX = c * gridSize + gridSize / 2;
+                        const centerY = r * gridSize + gridSize / 2;
+                        for (let i = 0; i < 6; i++) {
+                            const angle = Math.random() * Math.PI * 2;
+                            const speed = 1 + Math.random() * 2;
+                            poppingFragments.push({
+                                x: centerX,
+                                y: centerY,
+                                vx: Math.cos(angle) * speed,
+                                vy: Math.sin(angle) * speed,
+                                color: board[r][c],
+                                time: 500
+                            });
+                        }
+                    }
+                    playPop();
+                    board.splice(r, 1);
+                    board.push(Array(cols).fill(0));
+                    linesCleared++;
+                    r++;
+                }
+            }
+            score += linesCleared * 10;
+        }
+
+        function rotatePiece() {
+            const rotated = currentPiece.shape[0].map((_, idx) =>
+                currentPiece.shape.map(row => row[idx]).reverse()
+            );
+            const oldShape = currentPiece.shape;
+            currentPiece.shape = rotated;
+            if (collide(currentPiece)) {
+                currentPiece.shape = oldShape;
+            }
+        }
+
+        function movePiece(dx, dy) {
+            currentPiece.x += dx;
+            currentPiece.y += dy;
+            if (collide(currentPiece)) {
+                currentPiece.x -= dx;
+                currentPiece.y -= dy;
+                if (dy < 0) {
+                    merge(currentPiece);
+                    clearRows();
+                    currentPiece = newPiece();
+                    if (collide(currentPiece) && dropCounter > 0) {
+                        gameOver = true;
+                        alert(`Game Over! Score: ${score}`);
+                        board = Array(rows).fill().map(() => Array(cols).fill(0));
+                        score = 0;
+                        gameOver = false;
+                    }
+                }
+                return false;
+            }
+            return true;
+        }
+
+        function teleportPiece() {
+            while (movePiece(0, -1)) {}
+        }
+
+        let lastTime = 0;
+        let time = 0;
+        let touchStartTime = 0;
+        function updateLoop(timeStamp = 0) {
+            if (!gameStarted) return;
+            time = timeStamp;
+            if (gameOver || paused) return;
+            const deltaTime = timeStamp - lastTime;
+            lastTime = timeStamp;
+            dropCounter += deltaTime;
+
+            if (speedPressed) {
+                speedHeldTime += deltaTime;
+                if (speedHeldTime >= teleportThreshold) {
+                    teleportPiece();
+                    speedHeldTime = 0;
+                    speedPressed = false;
+                } else if (dropCounter > fastDropInterval) {
+                    movePiece(0, -1);
+                    dropCounter = 0;
+                }
+            } else if (dropCounter > dropInterval) {
+                movePiece(0, -1);
+                dropCounter = 0;
+            }
+
+            draw();
+            requestAnimationFrame(updateLoop);
+        }
+
+        // Settings menu buttons
+        const pauseBtn = document.getElementById('pause-btn');
+        pauseBtn.addEventListener('click', () => {
+            initAudio();
+            if (!gameStarted) return;
+            paused = !paused;
+            pauseBtn.textContent = paused ? 'Resume' : 'Pause';
+            if (!paused) updateLoop();
+        });
+
+        const fullscreenBtn = document.getElementById('fullscreen-btn');
+        fullscreenBtn.addEventListener('click', () => {
+            initAudio();
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.log(`Fullscreen failed: ${err.message}`);
+                    alert('Fullscreen may not work on iPhone. Try landscape mode.');
+                });
+                fullscreenBtn.textContent = 'Exit Full Screen';
+                adjustCanvasResolution();
+            } else {
+                document.exitFullscreen();
+                fullscreenBtn.textContent = 'Full Screen';
+                adjustCanvasResolution();
+            }
+        });
+
+        const instructionsBtn = document.getElementById('instructions-btn');
+        instructionsBtn.addEventListener('click', () => {
+            initAudio();
+            alert(keyboardInstructions.trim());
+        });
+        instructionsBtn.addEventListener('touchstart', e => {
+            e.preventDefault();
+            initAudio();
+            alert(touchInstructions.trim());
+        });
+
+        // Teleport button for touchscreens
+        if (isTouchDevice) {
+            const teleportBtn = document.getElementById('teleport-btn');
+            teleportBtn.addEventListener('click', () => {
+                initAudio();
+                if (!gameStarted || gameOver || paused || !currentPiece) return;
+                teleportPiece();
+            });
+            teleportBtn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                initAudio();
+                if (!gameStarted || gameOver || paused || !currentPiece) return;
+                teleportPiece();
+            });
+        }
+
+        // Instructions text
+        const keyboardInstructions = `
+Controls (Keyboard):
+- Left Arrow or A: Move left
+- Right Arrow or D: Move right
+- Up Arrow or W: Speed up (hold 0.5s to teleport)
+- Down Arrow or S: Rotate piece
+- Pause button: Pause/Resume game
+Goal: Stack balloons as they float up. Fill a row to clear it and score 10 points per row. Game ends if balloons can't spawn.
+        `;
+        const touchInstructions = `
+Controls (Touchscreen):
+- Swipe left: Move left
+- Swipe right: Move right
+- Swipe up: Speed up (~50% faster)
+- Swipe down: Rotate piece
+- Teleport button: Drop block instantly
+- Pause button: Pause/Resume game
+Goal: Stack balloons as they float up. Fill a row to clear it and score 10 points per row. Game ends if balloons can't spawn.
+        `;
+
+        // Keyboard controls
+        document.addEventListener('keydown', e => {
+            if (!gameStarted || gameOver || paused) return;
+            switch (e.key) {
+                case 'ArrowLeft': case 'a': movePiece(-1, 0); break;
+                case 'ArrowRight': case 'd': movePiece(1, 0); break;
+                case 'ArrowUp': case 'w': 
+                    speedPressed = true;
+                    speedHeldTime = 0;
+                    break;
+                case 'ArrowDown': case 's': 
+                    rotatePiece();
+                    draw();
+                    break;
+            }
+        });
+
+        document.addEventListener('keyup', e => {
+            if (e.key === 'ArrowUp' || e.key === 'w') {
+                speedPressed = false;
+                speedHeldTime = 0;
+            }
+        });
+
+        // Touchscreen controls
+        let touchStartX = 0;
+        let touchStartY = 0;
+        canvas.addEventListener('touchstart', e => {
+            e.preventDefault();
+            initAudio();
+            if (!gameStarted) startGame();
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+            touchStartTime = performance.now();
+        });
+        canvas.addEventListener('touchmove', e => {
+            e.preventDefault();
+            if (!gameStarted || !currentPiece) return;
+            const touchX = e.touches[0].clientX;
+            const touchY = e.touches[0].clientY;
+            const dx = touchX - touchStartX;
+            const dy = touchY - touchStartY;
+
+            if (Math.abs(dx) > 20) {
+                movePiece(dx > 0 ? 1 : -1, 0);
+                touchStartX = touchX;
+            }
+            if (dy < -20 && !speedPressed) {
+                speedPressed = true;
+                dropInterval = 667;
+                touchStartY = touchY;
+            }
+            if (dy > 40 && (time - lastRotateTime > 300)) {
+                rotatePiece();
+                lastRotateTime = time;
+                touchStartY = touchY;
+            }
+            draw();
+        });
+        canvas.addEventListener('touchend', e => {
+            e.preventDefault();
+            speedPressed = false;
+            dropInterval = 1000;
+        });
+
+        requestAnimationFrame(updateLoop);
+    </script>
+</body>
+</html>
