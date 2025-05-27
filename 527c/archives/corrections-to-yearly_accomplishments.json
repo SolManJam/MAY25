@@ -1,0 +1,13 @@
+[
+    {"name": "Tyler", "year": 1844, "description": "On July 3, 1844, Tyler signed the Treaty of Wanghia with China, opening trade ports and expanding U.S. commerce."},
+    {"name": "Buchanan", "year": 1859, "description": "In 1859, Buchanan responded to John Brown’s raid on Harpers Ferry, sending federal troops to suppress the abolitionist uprising."},
+    {"name": "Grant", "year": 1874, "description": "On April 22, 1874, Grant vetoed the Inflation Bill, maintaining the gold standard."},
+    {"name": "Arthur", "year": 1884, "description": "In 1884, Arthur oversaw the completion of the Washington Monument, a national landmark."},
+    {"name": "B. Harrison", "year": 1889, "description": "In 1889, Harrison signed bills admitting North Dakota, South Dakota, Montana, and Washington as states."},
+    {"name": "B. Harrison", "year": 1890, "description": "On July 2, 1890, Harrison signed the Sherman Antitrust Act, curbing monopolies in business."},
+    {"name": "Taft", "year": 1912, "description": "On April 9, 1912, Taft signed the bill creating the Children’s Bureau, addressing child welfare issues."},
+    {"name": "Wilson", "year": 1916, "description": "On September 1, 1916, Wilson signed the Keating-Owen Act, restricting child labor."},
+    {"name": "Coolidge", "year": 1925, "description": "On February 28, 1925, Coolidge signed the Federal Corrupt Practices Act, regulating campaign financing."},
+    {"name": "Hoover", "year": 1931, "description": "In June 1931, Hoover proposed the Hoover Moratorium, suspending World War I debt payments to aid global recovery."},
+    {"name": "Hoover", "year": 1932, "description": "On January 22, 1932, Hoover signed the Reconstruction Finance Corporation Act to aid struggling businesses."}
+]

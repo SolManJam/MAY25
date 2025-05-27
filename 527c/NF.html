@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>US Presidents Game</title>
+    <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="NF-styles.css">
+</head>
+<body>
+    <script defer src="NF-scripts.js"></script>
+
+    <!-- Game Area -->
+    <div id="gameArea">
+        <div id="leftSide">
+            <img id="currentImage" src="" alt="President Card" style="display: block;">
+            <img id="nextImage" src="" alt="Next President Card" style="display: none;">
+        </div>
+        <div id="rightSide">
+            <div class="option" data-value=""></div>
+            <div class="option" data-value=""></div>
+            <div class="option" data-value=""></div>
+            <div class="option" data-value=""></div>
+            <div class="option" data-value=""></div>
+        </div>
+    </div>
+
+    <!-- Message Area -->
+    <div id="message"></div>
+
+    <!-- Settings Popup -->
+    <div id="settingsPopup" style="display: none;">
+        <div class="cloud-box">
+            <h3>Settings</h3>
+            <form>
+                <fieldset>
+                    <legend>Mode</legend>
+                    <label>
+                        <input type="radio" name="mode" value="years"> Term Years
+                    </label>
+                    <label>
+                        <input type="radio" name="mode" value="number"> # President
+                    </label>
+                </fieldset>
+                <fieldset>
+                    <legend>Difficulty Level</legend>
+                    <label>
+                        <input type="radio" name="difficulty" value="3" checked> Level 3 (3 options)
+                    </label>
+                    <label>
+                        <input type="radio" name="difficulty" value="4"> Level 4 (4 options)
+                    </label>
+                    <label>
+                        <input type="radio" name="difficulty" value="5"> Level 5 (5 options)
+                    </label>
+                </fieldset>
+            </form>
+            <button id="settingsOkay">Okay</button>
+        </div>
+    </div>
+
+    <!-- Report Card with 9 Columns -->
+    <div id="reportCard">
+        <h2>REPORT CARD: <span id="roundIndicator"></span></h2>
+        <div id="reportColumns">
+            <div id="column1" class="report-column"></div>
+            <div id="column2" class="report-column"></div>
+            <div id="column3" class="report-column"></div>
+            <div id="column4" class="report-column"></div>
+            <div id="column5" class="report-column"></div>
+            <div id="column6" class="report-column"></div>
+            <div id="column7" class="report-column"></div>
+            <div id="column8" class="report-column"></div>
+            <div id="column9" class="report-column"></div>
+        </div>
+        <div id="scrollControls">
+    <button id="scrollLeft">Scroll Left</button>
+    <button id="scrollRight">Scroll Right</button>
+</div>
+        <button id="continue">Continue to Next Round</button>
+    </div>
+
+    <!-- Full Screen View for "Show More" -->
+    <div id="fullScreenView">
+        <div style="text-align: center; margin-bottom: 20px;">
+            <a href="#" id="returnLink">Return to REPORT CARD</a>
+        </div>
+        <div id="gridContainer"></div>
+    </div>
+
+    <!-- Final Message with single cloud background -->
+    <div id="finalMessage" class="cloud-box">
+        <h2>Thanks for playing!</h2>
+        <p id="finalScore"></p>
+        <p id="grade"></p>
+        <a href="#" id="playAgain">Play again</a>
+        <a href="#" id="viewOverallTop10">View Overall TOP 10</a>
+        <a href="#" id="viewSpeedrunTop10">View Speedrun TOP 10</a>
+    </div>
+
+    <!-- Score Submission Dialog -->
+    <div id="scoreSubmission" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border: 1px solid black; z-index: 1001;">
+        <h3>Enter your initials (3 letters)</h3>
+        <input type="text" id="initials" maxlength="3">
+        <button id="submitScore">Submit</button>
+    </div>
+
+    <!-- Overall TOP 10 Scoreboard -->
+    <div id="overallTop10" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.8); z-index: 1000; padding: 20px; overflow-y: auto;">
+        <h2>TOP 10 Overall Accuracy</h2>
+        <ol id="overallList"></ol>
+        <button id="returnFromOverall">Return to game</button>
+        <p id="autoReturnOverall" style="display: none;">Returning in <span id="countdownOverall">30</span> seconds</p>
+    </div>
+
+    <!-- Speedrun TOP 10 Scoreboard -->
+    <div id="speedrunTop10" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.8); z-index: 1000; padding: 20px; overflow-y: auto;">
+        <h2>TOP 10 Speedrun (First Round Perfect)</h2>
+        <ol id="speedrunList"></ol>
+        <button id="returnFromSpeedrun">Return to game</button>
+        <p id="autoReturnSpeedrun" style="display: none;">Returning in <span id="countdownSpeedrun">30</span> seconds</p>
+    </div>
+</body>
+</html>

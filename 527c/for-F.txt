@@ -1,0 +1,6 @@
+we have a project that uses an html file that uses a css and a javascript.  the javascript fetches json data to display hints into buttons
+
+i'll send you the html and javascript.  focus only on the fixes i mention in the chat because we're on a tight schedule.  
+please return the files in their full updated form for me to test during each revision.  
+i'll give you as detailed feedback as i can (given our time crunch).
+
