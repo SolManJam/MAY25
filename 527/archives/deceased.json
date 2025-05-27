@@ -1,0 +1,37 @@
+[
+    {
+        "name": "W.H. Harrison",
+        "date": "April 4, 1841",
+        "description": "On April 4, 1841, W.H. Harrison died of pneumonia, ending his presidency after 1 month, and was succeeded by John Tyler."
+    },
+    {
+        "name": "Taylor",
+        "date": "July 9, 1850",
+        "description": "On July 9, 1850, Zachary Taylor died of cholera or gastroenteritis, ending his presidency after 16 months, and was succeeded by Millard Fillmore."
+    },
+    {
+        "name": "Lincoln",
+        "date": "April 15, 1865",
+        "description": "On April 15, 1865, Abraham Lincoln died of assassination, ending his presidency after 4 years and 1 month, and was succeeded by Andrew Johnson."
+    },
+    {
+        "name": "Garfield",
+        "date": "September 19, 1881",
+        "description": "On September 19, 1881, James A. Garfield died of assassination, ending his presidency after 6 months, and was succeeded by Chester A. Arthur."
+    },
+    {
+        "name": "McKinley",
+        "date": "September 14, 1901",
+        "description": "On September 14, 1901, William McKinley died of assassination, ending his presidency after 4 years and 6 months, and was succeeded by Theodore Roosevelt."
+    },
+    {
+        "name": "Harding",
+        "date": "August 2, 1923",
+        "description": "On August 2, 1923, Warren G. Harding died of a heart attack or stroke, ending his presidency after 2 years and 5 months, and was succeeded by Calvin Coolidge."
+    },
+    {
+        "name": "FDR",
+        "date": "April 12, 1945",
+        "description": "On April 12, 1945, Franklin D. Roosevelt died of a cerebral hemorrhage, ending his presidency after 12 years and 1 month, and was succeeded by Harry S. Truman."
+    }
+]

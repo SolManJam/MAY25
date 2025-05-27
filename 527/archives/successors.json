@@ -1,0 +1,32 @@
+[
+    {
+        "name": "Tyler",
+        "succeeded": "W.H. Harrison",
+        "description": "John Tyler succeeded W.H. Harrison (who died in office) and served as president for 4 years."
+    },
+    {
+        "name": "Fillmore",
+        "succeeded": "Taylor",
+        "description": "Millard Fillmore succeeded Zachary Taylor (who died in office) and served as president for 3 years."
+    },
+    {
+        "name": "Johnson",
+        "succeeded": "Lincoln",
+        "description": "Andrew Johnson succeeded Abraham Lincoln (who died in office) and served as president for 4 years."
+    },
+    {
+        "name": "Arthur",
+        "succeeded": "Garfield",
+        "description": "Chester A. Arthur succeeded James A. Garfield (who died in office) and served as president for 3 years."
+    },
+    {
+        "name": "T. Roosevelt",
+        "succeeded": "McKinley",
+        "description": "Theodore Roosevelt succeeded William McKinley (who died in office) and served as president for 8 years."
+    },
+    {
+        "name": "Coolidge",
+        "succeeded": "Harding",
+        "description": "Calvin Coolidge succeeded Warren G. Harding (who died in office) and served as president for 6 years."
+    }
+]
