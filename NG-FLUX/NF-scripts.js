@@ -57,9 +57,9 @@ function setButtonHeights() {
     const optionDivs = document.querySelectorAll('.option');
     const visibleOptions = Array.from(optionDivs).filter(div => div.style.display !== 'none');
     const numButtons = visibleOptions.length;
-    const imageHeight = document.getElementById('currentImage').offsetHeight || 450; // Fallback to 450px
-    const totalGap = (numButtons - 1) * 5; // 5px gaps
-    const buttonHeight = (imageHeight - totalGap) / numButtons;
+    const gameAreaHeight = document.getElementById('gameArea').clientHeight;
+    const totalGap = (numButtons - 1) * 5; // 5px gap between buttons
+    const buttonHeight = (gameAreaHeight - totalGap) / numButtons;
     document.getElementById('rightSide').style.setProperty('--button-height', `${buttonHeight}px`);
 }
 
@@ -233,6 +233,10 @@ document.getElementById('message').addEventListener('click', function(event) {
         openSettingsPopup();
     }
 });
+
+// Call this function when the page loads and on orientation change
+window.addEventListener('load', setButtonHeights);
+window.addEventListener('resize', setButtonHeights);
 
 // Initialize the game
 hideAllScreens();
