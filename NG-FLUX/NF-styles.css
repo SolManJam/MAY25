@@ -162,7 +162,7 @@ body {
 
 #settingsPopup label {
     display: block;
-    margin-bottom: 5px;
+    snakes: 5px;
     font-family: 'Patrick Hand', cursive;
 }
 
@@ -357,8 +357,8 @@ button:hover {
     text-align: center;
 }
 
-/* Media Queries for Tablets (max-width: 768px) */
-@media (max-width: 768px) {
+/* Media Queries for Tablets and Mobile Portrait */
+@media (orientation: portrait) and (max-width: 768px) {
     #gameArea {
         flex-direction: column;
         align-items: center;
@@ -409,78 +409,60 @@ button:hover {
     }
 }
 
-/* Media Queries for Mobile Portrait (max-width: 480px) */
-@media (max-width: 480px) {
+@media (orientation: portrait) and (max-width: 480px) {
     #gameArea {
         flex-direction: column;
         align-items: center;
-        margin: 10px; /* Reduced margin for more vertical space */
+        margin: 10px;
     }
-    
     #leftSide {
-        width: 70%; /* Smaller card image */
-        max-width: none; /* Remove max-width constraint */
-        margin: 0 auto 10px auto; /* Centers and reduces space below */
+        width: 70%;
+        max-width: none;
+        margin: 0 auto 10px auto;
     }
-    
     #currentImage {
-        max-width: none; /* Allow image to fill #leftSide fully */
+        max-width: none;
     }
-    
     #rightSide {
-        width: 70%; /* Matches #leftSide width */
-        margin: 0 auto 10px auto; /* Centers and reduces space below */
+        width: 70%;
+        margin: 0 auto 10px auto;
         display: grid;
-        grid-template-columns: repeat(2, 1fr); /* 2x2 grid for buttons */
-        gap: 5px; /* 5px gap between buttons */
-        padding: 0; /* Ensures buttons align with card image edges */
+        grid-template-columns: repeat(2, 1fr);
+        gap: 5px;
+        padding: 0;
     }
-    
     .option {
-        width: auto; /* Buttons stretch to fill grid cells */
+        width: auto;
         height: auto;
-        min-height: 60px; /* Reduced min-height for better fit */
+        min-height: 60px;
         font-size: 18px;
         padding: 8px;
         margin: 0;
     }
-    
-    /* Ensure border is included in image width */
-    #currentImage {
-        box-sizing: border-box;
-    }
-    
-    /* Existing styles */
     #modeSelector {
         margin-bottom: 6px;
         max-width: 150px;
     }
-    
     #modeSelector select {
         font-size: 14px;
         padding: 3px 6px;
     }
-    
     #message {
         font-size: 14px;
         bottom: 10px;
         max-width: 95%;
     }
-    
     #gridContainer {
         grid-template-columns: 1fr;
         gap: 15px;
     }
-    
     #reportCard h2 {
         font-size: 24px;
     }
-    
     button {
         font-size: 14px;
         padding: 8px 16px;
     }
-    
     #reportColumns {
         grid-template-columns: 1fr;
     }
