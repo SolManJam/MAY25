@@ -419,11 +419,16 @@ button:hover {
     
     #leftSide {
         width: 70%; /* Smaller card image */
+        max-width: none; /* Remove max-width constraint */
         margin: 0 auto 10px auto; /* Centers and reduces space below */
     }
     
+    #currentImage {
+        max-width: none; /* Allow image to fill #leftSide fully */
+    }
+    
     #rightSide {
-        width: 70%; /* Matches card image width */
+        width: 70%; /* Matches #leftSide width */
         margin: 0 auto 10px auto; /* Centers and reduces space below */
         display: grid;
         grid-template-columns: repeat(2, 1fr); /* 2x2 grid for buttons */
@@ -432,7 +437,7 @@ button:hover {
     }
     
     .option {
-        width: auto;
+        width: auto; /* Buttons stretch to fill grid cells */
         height: auto;
         min-height: 60px; /* Reduced min-height for better fit */
         font-size: 18px;
