@@ -1,6 +1,6 @@
 // Simplified JavaScript for display testing
 
-let currentDifficulty = 3; // Default difficulty level
+let currentDifficulty = 3;
 
 // Static list of presidents for Report Card (hypothetical data)
 const presidents = [
@@ -42,6 +42,7 @@ function hideAllScreens() {
 
 // Show a message in the message area
 function showMessage(text) {
+    console.log("showMessage called with:", text); // Debug log
     const messageElement = document.getElementById('message');
     if (text) {
         messageElement.innerHTML = `<span class="cloud-text">${text} <i class="fas fa-cog gear-icon" title="Settings"></i></span>`;
@@ -52,12 +53,13 @@ function showMessage(text) {
     }
 }
 
-// Set dynamic button heights based on number of buttons and image height
+// Set dynamic button heights based on number of buttons and available space
 function setButtonHeights() {
     const optionDivs = document.querySelectorAll('.option');
     const visibleOptions = Array.from(optionDivs).filter(div => div.style.display !== 'none');
     const numButtons = visibleOptions.length;
-    const gameAreaHeight = document.getElementById('gameArea').clientHeight;
+    const gameArea = document.getElementById('gameArea');
+    const gameAreaHeight = gameArea ? gameArea.clientHeight : window.innerHeight - 40; // Fallback
     const totalGap = (numButtons - 1) * 5; // 5px gap between buttons
     const buttonHeight = (gameAreaHeight - totalGap) / numButtons;
     document.getElementById('rightSide').style.setProperty('--button-height', `${buttonHeight}px`);
@@ -147,7 +149,7 @@ function openSettingsPopup() {
 
 // Check if in mobile portrait mode
 function isMobilePortrait() {
-    return window.innerWidth <= 480;
+    return window.matchMedia("(max-width: 480px) and (orientation: portrait)").matches;
 }
 
 // Add event listeners to options
@@ -171,7 +173,7 @@ optionDivs.forEach((div, index) => {
                     // Mobile portrait: Show one hint in a super button
                     const hint = placeholderHints[Math.floor(Math.random() * placeholderHints.length)];
                     visibleOptions.forEach(d => {
-                        d.style.display = 'none'; // Hide all buttons
+                        d.style.display = 'none';
                     });
                     const superButton = document.createElement('div');
                     superButton.className = 'super-button';
@@ -234,9 +236,9 @@ document.getElementById('message').addEventListener('click', function(event) {
     }
 });
 
-// Call this function when the page loads and on orientation change
-window.addEventListener('load', setButtonHeights);
+// Ensure button heights adjust on resize
 window.addEventListener('resize', setButtonHeights);
+window.addEventListener('load', setButtonHeights);
 
 // Initialize the game
 hideAllScreens();
