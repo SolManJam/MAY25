@@ -17,18 +17,17 @@ body {
 #gameArea {
     display: flex;
     align-items: stretch;
-    margin: 20px;
-    position: relative;
+    margin: 0; /* Remove default margin to maximize space */
 }
 
 #leftSide {
     flex: 0 0 auto;
     max-width: 300px;
     width: 40%;
-    margin-right: 20px;
+    margin-right: 5px; /* 5px gap between image and buttons */
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start; /* Align image to the left within #leftSide */
 }
 
 #currentImage, #nextImage {
@@ -36,11 +35,10 @@ body {
     max-width: 300px;
     height: auto;
     display: block;
-    margin: 0 auto;
     border: 2px solid #333;
     border-radius: 10px;
     box-sizing: border-box;
-    max-height: calc(100vh - 40px); /* Prevents scrolling by limiting image height */
+    max-height: calc(100vh - 10px); /* Ensure no scrolling */
 }
 
 #nextImage {
@@ -51,19 +49,12 @@ body {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 5px;
-    padding: 0 20px;
-}
-
-@keyframes pulsate {
-    0% { background-color: #ffd700; }
-    50% { background-color: #ffea00; }
-    100% { background-color: #ffd700; }
+    gap: 5px; /* 5px gap between buttons */
+    margin-right: 5px; /* 5px from right edge */
 }
 
 .option {
     width: 100%;
-    min-height: 100px;
     padding: 10px;
     background-color: #1e5320;
     color: white;
@@ -80,25 +71,55 @@ body {
     justify-content: center;
 }
 
-/* Other styles remain unchanged until media queries */
+/* Landscape Mode for All Devices */
+@media (orientation: landscape) {
+    #gameArea {
+        flex-direction: row;
+        justify-content: flex-start; /* Align items to the left */
+        align-items: stretch;
+        margin: 0; /* No margin to use full width */
+        padding: 0 5px; /* 5px padding on left and right */
+    }
+    #leftSide {
+        width: auto; /* Let image size dictate width */
+        max-width: 250px; /* Cap image width */
+        margin-left: 0; /* No extra margin, controlled by #gameArea padding */
+        margin-right: 5px; /* 5px gap to buttons */
+        align-items: flex-start;
+    }
+    #rightSide {
+        flex: 1; /* Take remaining space */
+        margin-right: 0; /* Controlled by #gameArea padding */
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+    .option {
+        flex: 1; /* Distribute height evenly among buttons */
+        min-height: 0; /* Allow shrinking if needed */
+        font-size: 18px;
+        padding: 5px;
+    }
+}
 
-/* Media Queries */
-
-/* Portrait mode for tablets and larger mobile devices */
+/* Portrait Mode for Tablets and Larger Mobile Devices */
 @media (orientation: portrait) and (max-width: 768px) {
     #gameArea {
         flex-direction: column;
         align-items: center;
+        margin: 10px;
     }
     #leftSide {
         width: 80%;
         max-width: none;
         margin-right: 0;
         margin-bottom: 20px;
+        align-items: center;
     }
     #rightSide {
         width: 80%;
         padding: 0;
+        margin-right: 0;
     }
     .option {
         min-height: 100px;
@@ -107,7 +128,7 @@ body {
     }
 }
 
-/* Portrait mode for smaller mobile devices */
+/* Portrait Mode for Smaller Mobile Devices */
 @media (orientation: portrait) and (max-width: 480px) {
     #gameArea {
         flex-direction: column;
@@ -118,6 +139,7 @@ body {
         width: 70%;
         max-width: none;
         margin: 0 auto 10px auto;
+        align-items: center;
     }
     #currentImage {
         max-width: none;
@@ -139,32 +161,5 @@ body {
         margin: 0;
     }
 }
-
-/* Landscape mode adjustments for mobile devices */
-@media (orientation: landscape) and (max-width: 768px) {
-    #gameArea {
-        flex-direction: row; /* Ensures image on left, buttons on right */
-        align-items: flex-start;
-        margin: 10px; /* Reduced margin to maximize space */
-    }
-    #leftSide {
-        width: 30%; /* Reduced width to fit alongside buttons */
-        max-width: 250px;
-        margin-right: 10px;
-        margin-bottom: 0;
-    }
-    #rightSide {
-        width: auto;
-        flex: 1;
-        padding: 0 10px;
-    }
-    .option {
-        min-height: 60px; /* Adjusted height to fit four buttons */
-        font-size: 18px;
-        padding: 5px;
-    }
-}
-
-/* Note: Other styles below the media queries (e.g., #modeSelector, #settingsPopup, etc.) remain unchanged and are omitted for brevity. Ensure they are carried over from your current CSS file. */
 
 /* BOTTOM OF PAGE */
