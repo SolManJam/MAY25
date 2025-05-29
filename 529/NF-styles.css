@@ -1,0 +1,499 @@
+/* TOP OF PAGE */
+
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-image: url('background.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+#gameArea {
+    display: flex;
+    align-items: stretch;
+    margin: 20px;
+    position: relative;
+}
+
+#leftSide {
+    flex: 0 0 auto;
+    max-width: 300px;
+    width: 40%;
+    margin-right: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#presidentImage {
+    width: 100%;
+    height: auto;
+    border: 2px solid #333;
+    border-radius: 10px;
+    transition: opacity 0.3s ease;
+}
+
+#rightSide {
+    flex: 1; /* Allows #rightSide to grow and fill remaining space */
+    display: grid;
+    grid-template-columns: 1fr; /* Single column takes full width */
+    gap: 5px; /* 5px gap between buttons */
+    padding: 0 20px; /* 20px padding on left and right */
+    min-height: 100%; /* Match height of #leftSide */
+}
+
+/* Define the pulsating animation */
+@keyframes pulsate {
+    0% { background-color: #ffd700; }
+    50% { background-color: #ffea00; }
+    100% { background-color: #ffd700; }
+}
+
+/* Styles for president images */
+#currentImage, #nextImage {
+    width: 100%;
+    max-width: 300px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
+#nextImage {
+    display: none !important;
+}
+
+/* Base styles for options (buttons) */
+.option {
+    width: 100%; /* Buttons fill the grid column width */
+    height: var(--button-height, 100px); /* Dynamic height set by JS */
+    min-height: 100px;
+    padding: 10px;
+    background-color: #1e5320;
+    color: white;
+    border-radius: 10px;
+    font-size: 24px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    white-space: normal;
+    word-wrap: break-word;
+    text-align: center;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Hover effect */
+.option:hover:not(.disabled) {
+    background-color: #247028;
+}
+
+/* Disabled state */
+.option.disabled {
+    background-color: #808080;
+    color: transparent;
+}
+
+/* Override transparency for "Try Again" and hints */
+.option.try-again,
+.option.hints {
+    color: white !important;
+}
+
+/* Correct state with pulsating effect */
+.option.correct {
+    background-color: #ffd700;
+    color: navy;
+    animation: pulsate 0.8s infinite ease-in-out;
+}
+
+/* Focus states for accessibility */
+.option:focus {
+    outline: 2px solid #3498db;
+    outline-offset: 2px;
+}
+
+.option.disabled:focus {
+    outline: none;
+}
+
+#modeSelector {
+    margin-bottom: 10px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 8px;
+    border-radius: 10px;
+    width: 100%;
+    max-width: 200px;
+    z-index: 10;
+}
+
+#modeSelector select {
+    font-family: 'Patrick Hand', cursive;
+    font-size: 18px;
+    padding: 5px 10px;
+    border: 2px solid #333;
+    border-radius: 5px;
+    background: #fff;
+    cursor: pointer;
+    outline: none;
+    width: 100%;
+}
+
+#modeSelector select:focus {
+    border-color: #3498db;
+}
+
+#settingsPopup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1001;
+    display: none;
+}
+
+#settingsPopup .cloud-box {
+    padding: 20px;
+    text-align: left;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 10px;
+}
+
+#settingsPopup h3 {
+    margin-top: 0;
+    font-family: 'Patrick Hand', cursive;
+}
+
+#settingsPopup form {
+    margin-bottom: 10px;
+}
+
+#settingsPopup label {
+    display: block;
+    margin-bottom: 5px;
+    font-family: 'Patrick Hand', cursive;
+}
+
+#settingsPopup button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    font-family: 'Patrick Hand', cursive;
+}
+
+.gear-icon {
+    cursor: pointer;
+    font-size: 20px;
+    margin-left: 10px;
+}
+
+#modeSelector[style*="display: none"] {
+    display: none !important;
+}
+
+#roundIndicator {
+    font-weight: bold;
+    color: #333;
+}
+
+#message {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    font-size: 18px;
+    color: #333;
+    display: none;
+    text-align: center;
+    max-width: 90%;
+}
+
+#reportCard {
+    display: none;
+    margin: 20px;
+}
+
+#reportCard h2 {
+    font-size: 36px;
+    text-align: left;
+}
+
+#reportColumns {
+    display: grid;
+    grid-template-columns: repeat(9, 1fr);
+    gap: 10px;
+}
+
+.report-column {
+    text-align: left;
+}
+
+.missed {
+    color: red;
+}
+
+.percentage {
+    font-family: 'Patrick Hand', cursive;
+    font-size: 18px;
+}
+
+.showMore {
+    color: blue;
+    text-decoration: underline;
+    cursor: pointer;
+    display: block;
+    margin-top: 5px;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    margin: 5px;
+    cursor: pointer;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 5px;
+}
+
+button:hover {
+    background-color: #2980b9;
+}
+
+#fullScreenView {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.8);
+    z-index: 1000;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+#gridContainer {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+#gridContainer div {
+    padding: 10px;
+    text-align: left;
+}
+
+#finalMessage {
+    display: none;
+    text-align: center;
+    padding: 20px;
+}
+
+#grade {
+    font-family: 'Patrick Hand', cursive;
+    font-size: 48px;
+}
+
+#scoreSubmission {
+    background: white;
+    padding: 20px;
+    border: 1px solid black;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    text-align: center;
+}
+
+#scoreSubmission h3 {
+    margin-bottom: 10px;
+}
+
+#scoreSubmission input {
+    margin-bottom: 10px;
+    padding: 5px;
+    font-size: 16px;
+}
+
+#scoreSubmission button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+#overallTop10, #speedrunTop10 {
+    background: rgba(255, 255, 255, 0.8);
+    padding: 20px;
+    overflow-y: auto;
+}
+
+#overallTop10 h2, #speedrunTop10 h2 {
+    margin-bottom: 20px;
+}
+
+#overallList, #speedrunList {
+    list-style-position: inside;
+    padding-left: 20px;
+}
+
+#returnFromOverall, #returnFromSpeedrun {
+    margin-top: 20px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+#autoReturnOverall, #autoReturnSpeedrun {
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+.cloud-text {
+    background: rgba(255, 255, 255, 0.8);
+    padding: 10px;
+    border-radius: 10px;
+    display: inline-block;
+}
+
+.cloud-box {
+    background: rgba(255, 255, 255, 0.8);
+    padding: 20px;
+    border-radius: 10px;
+    margin: 20px auto;
+    max-width: 600px;
+    text-align: center;
+}
+
+/* Media Queries for Tablets (max-width: 768px) */
+@media (max-width: 768px) {
+    #gameArea {
+        flex-direction: column;
+        align-items: center;
+    }
+    #leftSide {
+        width: 80%;
+        max-width: none;
+        margin-right: 0;
+        margin-bottom: 20px;
+    }
+    #rightSide {
+        width: 80%;
+        padding: 0;
+    }
+    .option {
+        width: 100%; /* Buttons expand on tablets */
+        height: var(--button-height, 100px);
+        font-size: 20px;
+        padding: 8px;
+    }
+    #modeSelector {
+        margin-bottom: 8px;
+        max-width: 180px;
+    }
+    #modeSelector select {
+        font-size: 16px;
+        padding: 4px 8px;
+    }
+    #message {
+        font-size: 16px;
+        bottom: 15px;
+        max-width: 95%;
+    }
+    #reportColumns {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    .report-column {
+        width: 80%;
+        margin-bottom: 20px;
+    }
+    #gridContainer {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    #scoreSubmission {
+        width: 80%;
+    }
+    #overallTop10, #speedrunTop10 {
+        padding: 10px;
+    }
+}
+
+/* Media Queries for Mobile Portrait (max-width: 480px) */
+@media (max-width: 480px) {
+    #leftSide {
+        width: 100%;
+        max-width: 80%; /* Image takes most of the space */
+        margin: 0 auto 20px;
+    }
+    #rightSide {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr); /* 2x2 grid for buttons */
+        grid-template-rows: repeat(2, auto);
+        gap: 5px;
+        padding: 0 10px;
+        height: auto; /* Let buttons take minimal space */
+    }
+    .option {
+        width: 100%; /* Fit within grid cell */
+        height: 60px; /* Smaller buttons */
+        font-size: 16px; /* Smaller font for mobile */
+        padding: 8px;
+    }
+    .option:nth-child(4) {
+        display: none; /* Hide 4th button in 3-button mode */
+    }
+    .super-button {
+        grid-column: 1 / 3; /* Span both columns */
+        grid-row: 1 / 3; /* Span both rows */
+        width: 100%;
+        height: 130px; /* Approximate height of 2 buttons + gap */
+        background-color: #1e5320;
+        color: white;
+        border-radius: 10px;
+        font-size: 16px;
+        padding: 10px;
+        cursor: pointer;
+        text-align: center;
+        box-sizing: border-box;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        white-space: normal;
+        word-wrap: break-word;
+    }
+    #modeSelector {
+        margin-bottom: 6px;
+        max-width: 150px;
+    }
+    #modeSelector select {
+        font-size: 14px;
+        padding: 3px 6px;
+    }
+    #message {
+        font-size: 14px;
+        bottom: 10px;
+        max-width: 95%;
+    }
+    #gridContainer {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    #reportCard h2 {
+        font-size: 24px;
+    }
+    button {
+        font-size: 14px;
+        padding: 8px 16px;
+    }
+    #reportColumns {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* BOTTOM OF PAGE */
