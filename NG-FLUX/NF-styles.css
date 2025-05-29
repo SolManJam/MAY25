@@ -1,74 +1,365 @@
+/* TOP OF PAGE */
+
+/* General Styles */
 html, body {
     height: 100%;
     margin: 0;
-    overflow: hidden;
+    overflow: hidden; /* Prevent scrolling */
 }
 
 body {
     font-family: Arial, sans-serif;
-    background: #f0f0f0;
+    text-align: center;
+    background-image: url('background.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
+/* Game Area */
 #gameArea {
     display: flex;
     align-items: stretch;
     margin: 20px;
-    height: calc(100vh - 40px);
-    overflow: hidden;
+    position: relative;
+    height: calc(100vh - 40px); /* Full viewport height minus margins */
+    overflow: hidden; /* Prevent scrolling within game area */
 }
 
+/* Left Side (Image) */
 #leftSide {
     flex: 0 0 auto;
-    width: 40%;
     max-width: 300px;
+    width: 40%;
     margin-right: 20px;
     display: flex;
-    align-items: stretch;
+    flex-direction: column;
+    align-items: center;
+    max-height: 100%; /* Constrain to game area height */
 }
 
-#currentImage {
+/* President Image */
+#currentImage, #nextImage {
     width: 100%;
-    height: 100%;
-    object-fit: contain;
+    height: auto;
+    max-height: 100%; /* Fit within leftSide container */
+    object-fit: contain; /* Maintain aspect ratio */
     border: 2px solid #333;
     border-radius: 10px;
+    transition: opacity 0.3s ease;
+}
+#nextImage {
+    display: none !important;
 }
 
+/* Right Side (Buttons) */
 #rightSide {
     flex: 1;
     display: flex;
     flex-direction: column;
+    justify-content: space-between; /* Evenly space buttons */
     gap: 5px;
     padding: 0 20px;
-    overflow: hidden;
+    overflow: hidden; /* Prevent button scrolling */
+    height: 100%;
 }
 
+/* Button Styles */
 .option {
     width: 100%;
+    height: var(--button-height, 100px); /* Dynamic height set by JS */
+    min-height: 40px; /* Allow smaller buttons if needed */
+    padding: 10px;
     background-color: #1e5320;
     color: white;
     border-radius: 10px;
     font-size: 24px;
     cursor: pointer;
+    transition: background-color 0.3s;
+    white-space: normal;
+    word-wrap: break-word;
+    text-align: center;
+    box-sizing: border-box;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-sizing: border-box;
 }
 
+/* Hover effect */
 .option:hover:not(.disabled) {
     background-color: #247028;
+}
+
+/* Disabled state */
+.option.disabled {
+    background-color: #808080;
+    color: transparent;
+}
+
+/* Override transparency for "Try Again" and hints */
+.option.try-again,
+.option.hints {
+    color: white !important;
+}
+
+/* Correct state with pulsating effect */
+.option.correct {
+    background-color: #ffd700;
+    color: navy;
+    animation: pulsate 0.8s infinite ease-in-out;
+}
+
+/* Pulsating animation */
+@keyframes pulsate {
+    0% { background-color: #ffd700; }
+    50% { background-color: #ffea00; }
+    100% { background-color: #ffd700; }
+}
+
+/* Focus states for accessibility */
+.option:focus {
+    outline: 2px solid #3498db;
+    outline-offset: 2px;
+}
+
+.option.disabled:focus {
+    outline: none;
+}
+
+/* Message Area */
+#message {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    font-size: 18px;
+    color: #333;
+    display: none;
+    text-align: center;
+    max-width: 90%;
+}
+
+/* Settings Popup */
+#settingsPopup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1001;
+    display: none;
+}
+
+#settingsPopup .cloud-box {
+    padding: 20px;
+    text-align: left;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 10px;
+}
+
+#settingsPopup h3 {
+    margin-top: 0;
+    font-family: 'Patrick Hand', cursive;
+}
+
+#settingsPopup form {
+    margin-bottom: 10px;
+}
+
+#settingsPopup label {
+    display: block;
+    margin-bottom: 5px;
+    font-family: 'Patrick Hand', cursive;
+}
+
+#settingsPopup button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    font-family: 'Patrick Hand', cursive;
 }
 
 .version {
     font-size: 14px;
     color: #333;
-    text-align: right;
     margin-top: 10px;
+    text-align: right;
+    display: block !important;
+    opacity: 1;
 }
 
-/* Mobile Portrait */
-@media (max-width: 480px) and (orientation: portrait) {
+/* Gear Icon */
+.gear-icon {
+    cursor: pointer;
+    font-size: 20px;
+    margin-left: 10px;
+}
+
+/* Report Card */
+#reportCard {
+    display: none;
+    margin: 20px;
+}
+
+#reportCard h2 {
+    font-size: 36px;
+    text-align: left;
+}
+
+#reportColumns {
+    display: grid;
+    grid-template-columns: repeat(9, 1fr);
+    gap: 10px;
+}
+
+.report-column {
+    text-align: left;
+}
+
+.missed {
+    color: red;
+}
+
+.percentage {
+    font-family: 'Patrick Hand', cursive;
+    font-size: 18px;
+}
+
+.showMore {
+    color: blue;
+    text-decoration: underline;
+    cursor: pointer;
+    display: block;
+    margin-top: 5px;
+}
+
+/* Buttons */
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    margin: 5px;
+    cursor: pointer;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 5px;
+}
+
+button:hover {
+    background-color: #2980b9;
+}
+
+/* Full Screen View */
+#fullScreenView {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.8);
+    z-index: 1000;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+#gridContainer {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+#gridContainer div {
+    padding: 10px;
+    text-align: left;
+}
+
+/* Final Message */
+#finalMessage {
+    display: none;
+    text-align: center;
+    padding: 20px;
+}
+
+#grade {
+    font-family: 'Patrick Hand', cursive;
+    font-size: 48px;
+}
+
+/* Score Submission */
+#scoreSubmission {
+    background: white;
+    padding: 20px;
+    border: 1px solid black;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    text-align: center;
+}
+
+#scoreSubmission h3 {
+    margin-bottom: 10px;
+}
+
+#scoreSubmission input {
+    margin-bottom: 10px;
+    padding: 5px;
+    font-size: 16px;
+}
+
+#scoreSubmission button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+/* Top 10 Scoreboards */
+#overallTop10, #speedrunTop10 {
+    background: rgba(255, 255, 255, 0.8);
+    padding: 20px;
+    overflow-y: auto;
+}
+
+#overallTop10 h2, #speedrunTop10 h2 {
+    margin-bottom: 20px;
+}
+
+#overallList, #speedrunList {
+    list-style-position: inside;
+    padding-left: 20px;
+}
+
+#returnFromOverall, #returnFromSpeedrun {
+    margin-top: 20px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+#autoReturnOverall, #autoReturnSpeedrun {
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+/* Cloud Text and Box */
+.cloud-text {
+    background: rgba(255, 255, 255, 0.8);
+    padding: 10px;
+    border-radius: 10px;
+    display: inline-block;
+}
+
+.cloud-box {
+    background: rgba(255, 255, 255, 0.8);
+    padding: 20px;
+    border-radius: 10px;
+    margin: 20px auto;
+    max-width: 600px;
+    text-align: center;
+}
+
+/* Media Queries for Tablets (max-width: 768px) */
+@media (max-width: 768px) {
     #gameArea {
         flex-direction: column;
         align-items: center;
@@ -76,39 +367,96 @@ body {
     #leftSide {
         width: 80%;
         max-width: none;
-        height: 50%;
-        margin: 0 0 20px 0;
+        margin-right: 0;
+        margin-bottom: 20px;
     }
     #rightSide {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        grid-gap: 5px;
-        padding: 0 10px;
-        height: auto;
         width: 80%;
+        padding: 0;
     }
     .option {
         height: 60px;
         font-size: 16px;
+        padding: 5px;
+    }
+    #modeSelector {
+        margin-bottom: 8px;
+        max-width: 180px;
+    }
+    #modeSelector select {
+        font-size: 16px;
+        padding: 4px 8px;
+    }
+    #message {
+        font-size: 16px;
+        bottom: 15px;
+        max-width: 95%;
+    }
+    #reportColumns {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    .report-column {
+        width: 80%;
+        margin-bottom: 20px;
+    }
+    #gridContainer {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    #scoreSubmission {
+        width: 80%;
+    }
+    #overallTop10, #speedrunTop10 {
+        padding: 10px;
     }
 }
 
-/* Mobile Landscape */
-@media (max-width: 768px) and (orientation: landscape) {
-    #gameArea {
-        flex-direction: row;
-    }
+/* Media Queries for Mobile Portrait (max-width: 480px) */
+@media (max-width: 480px) {
     #leftSide {
-        width: 40%;
-        height: 100%;
-    }
-    #currentImage {
-        max-height: calc(100vh - 40px);
+        width: 100%;
     }
     #rightSide {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: repeat(2, auto);
         gap: 5px;
+        padding: 0 10px;
+        height: auto;
     }
     .option {
-        font-size: 18px;
+        height: 60px;
+        font-size: 16px;
+        padding: 8px;
+    }
+    #modeSelector {
+        margin-bottom: 6px;
+        max-width: 150px;
+    }
+    #modeSelector select {
+        font-size: 14px;
+        padding: 3px 6px;
+    }
+    #message {
+        font-size: 14px;
+        bottom: 10px;
+        max-width: 95%;
+    }
+    #gridContainer {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    #reportCard h2 {
+        font-size: 24px;
+    }
+    button {
+        font-size: 14px;
+        padding: 8px 16px;
+    }
+    #reportColumns {
+        grid-template-columns: 1fr;
     }
 }
+
+/* BOTTOM OF PAGE */
+
+/* Date and Time: 02:04 PM CDT on Thursday, May 29, 2025 */

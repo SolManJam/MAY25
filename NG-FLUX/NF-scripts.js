@@ -53,6 +53,10 @@ document.getElementById('message').addEventListener('click', function(event) {
     }
 });
 
+if (window.matchMedia("(orientation: portrait)").matches) {
+    document.body.classList.add("portrait-mode");
+}
+
 window.addEventListener('resize', setButtonHeights);
 window.addEventListener('load', () => {
     updateOptionsDisplay(currentDifficulty);
