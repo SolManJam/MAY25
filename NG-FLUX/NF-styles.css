@@ -39,6 +39,7 @@ body {
     margin: 0 auto;
     border: 2px solid #333;
     border-radius: 10px;
+    box-sizing: border-box; /* Ensures border is included in width */
 }
 
 #nextImage {
@@ -413,32 +414,38 @@ button:hover {
     #gameArea {
         flex-direction: column;
         align-items: center;
-        margin: 20px; /* Maintains outer spacing */
+        margin: 10px; /* Reduced margin for more vertical space */
     }
     
     #leftSide {
-        width: 100%;
-        margin-bottom: 20px; /* Space between image and buttons */
+        width: 70%; /* Smaller card image */
+        margin: 0 auto 10px auto; /* Centers and reduces space below */
     }
     
     #rightSide {
-        width: 100%;
+        width: 70%; /* Matches card image width */
+        margin: 0 auto 10px auto; /* Centers and reduces space below */
         display: grid;
-        grid-template-columns: repeat(2, 1fr); /* Two equal columns */
-        gap: 5px; /* 5px gap between rows and columns */
-        padding: 0; /* Remove padding to align buttons with image edges */
+        grid-template-columns: repeat(2, 1fr); /* 2x2 grid for buttons */
+        gap: 5px; /* 5px gap between buttons */
+        padding: 0; /* Ensures buttons align with card image edges */
     }
     
     .option {
-        width: auto; /* Let grid control width */
-        height: auto; /* Allow content to determine height */
-        min-height: 80px; /* Ensure buttons are tappable */
+        width: auto;
+        height: auto;
+        min-height: 60px; /* Reduced min-height for better fit */
         font-size: 18px;
         padding: 8px;
-        margin: 0; /* Remove any margins that might offset alignment */
+        margin: 0;
     }
     
-    /* Existing styles remain unless overridden */
+    /* Ensure border is included in image width */
+    #currentImage {
+        box-sizing: border-box;
+    }
+    
+    /* Existing styles */
     #modeSelector {
         margin-bottom: 6px;
         max-width: 150px;
