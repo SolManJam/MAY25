@@ -232,13 +232,13 @@ function moveToNextPresident() {
 }
 
 function startNewRound() {
-    if (round === 1) {
+    /*if (round === 1) {
         currentDifficulty = 3;
     } else if (round === 2) {
         currentDifficulty = 4;
     } else if (round >= 3) {
         currentDifficulty = 5;
-    }
+    }*/
 
     hideAllScreens();
     document.getElementById('gameArea').style.display = 'flex';
@@ -781,8 +781,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 accomplishmentsByName[entry.name].push(entry);
             });
             preloadAllImages();
-            // Set initial difficulty from local storage
+            // Set initial mode and difficulty from local storage
+            const savedMode = localStorage.getItem('gameMode') || 'number';
             const savedDifficulty = localStorage.getItem('gameDifficulty') || '3';
+            currentMode = savedMode;
             currentDifficulty = parseInt(savedDifficulty, 10);
             startNewRound();
         })
