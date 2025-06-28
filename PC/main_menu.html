@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>US Presidents Game - Main Menu</title>
+    <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="O-styles.css">
+</head>
+<body>
+    <script defer src="main_menu.js"></script>
+
+    <!-- Game Area -->
+    <div id="gameArea">
+        <div id="leftSide">
+            <img id="currentImage" src="CARDS/O-1.jpg" alt="George Washington Card">
+        </div>
+        <div id="rightSide">
+            <div class="option" onclick="window.location.href='new_game.html'">New Game</div>
+            <div class="option" onclick="window.location.href='leaderboard.html'">Leaderboard</div>
+            <div class="option" onclick="window.location.href='add_more_cards.html'">Add more cards</div>
+            <div class="option" onclick="window.location.href='settings.html'">Settings</div>
+            <div class="option" onclick="window.location.href='review.html'">Review</div>
+            <div class="option" onclick="window.location.href='more_games.html'">More 6-Pack Games</div>
+        </div>
+    </div>
+</body>
+</html>
