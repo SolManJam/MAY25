@@ -1,0 +1,150 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-image: url('background.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    margin: 0;
+    height: 100vh;
+}
+
+#reportCard {
+    margin: 20px;
+}
+
+#reportCard h2 {
+    font-size: 36px;
+    text-align: left;
+}
+
+#roundIndicator {
+    font-weight: bold;
+    color: #333;
+}
+
+#reportColumns {
+    display: grid;
+    grid-template-columns: repeat(9, 1fr);
+    gap: 10px;
+}
+
+.report-column {
+    text-align: left;
+}
+
+.cloud-text {
+    background: rgba(255, 255, 255, 0.8);
+    padding: 10px;
+    border-radius: 10px;
+    display: inline-block;
+}
+
+.missed {
+    color: red;
+}
+
+.percentage {
+    font-family: 'Patrick Hand', cursive;
+    font-size: 18px;
+}
+
+.showMore {
+    color: blue;
+    text-decoration: underline;
+    cursor: pointer;
+    display: block;
+    margin-top: 5px;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    margin: 5px;
+    cursor: pointer;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 5px;
+}
+
+button:hover {
+    background-color: #2980b9;
+}
+
+#fullScreenView {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.8);
+    z-index: 1000;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+#gridContainer {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+#gridContainer div {
+    padding: 10px;
+    text-align: left;
+}
+
+#scoreSubmission {
+    background: white;
+    padding: 20px;
+    border: 1px solid black;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    text-align: center;
+}
+
+#scoreSubmission h3 {
+    margin-bottom: 10px;
+}
+
+#scoreSubmission input {
+    margin-bottom: 10px;
+    padding: 5px;
+    font-size: 16px;
+}
+
+#scoreSubmission button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+@media (max-width: 768px) {
+    #reportColumns {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    #gridContainer {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    #scoreSubmission {
+        width: 80%;
+    }
+}
+
+@media (max-width: 480px) {
+    #reportCard h2 {
+        font-size: 24px;
+    }
+    #reportColumns {
+        grid-template-columns: 1fr;
+    }
+    #gridContainer {
+        grid-template-columns: 1fr;
+    }
+    button {
+        font-size: 14px;
+        padding: 8px 16px;
+    }
+}
