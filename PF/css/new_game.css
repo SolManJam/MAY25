@@ -1,0 +1,511 @@
+/* US Presidents Game - Updated CSS File */
+
+/* ==================== */
+/* Global Styles */
+/* ==================== */
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-image: url('../assets/background-landscape.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+/* ==================== */
+/* Game Area Styles */
+/* ==================== */
+#gameArea {
+    display: flex;
+    align-items: stretch;
+    margin: 20px;
+    position: relative;
+}
+
+#leftSide {
+    flex: 0 0 auto;
+    max-width: 300px;
+    width: 40%;
+    margin-right: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#presidentImage {
+    width: 100%;
+    height: auto;
+    border: 2px solid #333;
+    border-radius: 10px;
+    transition: opacity 0.3s ease;
+}
+
+#rightSide {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(200px, 1fr));
+    grid-auto-rows: auto;
+    row-gap: 10px;
+    column-gap: 10px;
+    position: relative;
+}
+
+/* Define pulsating animation */
+@keyframes pulsate {
+    0% { background-color: #ffd700; }
+    50% { background-color: #ffea00; }
+    100% { background-color: #ffd700; }
+}
+
+/* Styles for president images */
+#currentImage, #nextImage {
+    width: 100%;
+    max-width: 300px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
+#nextImage {
+    display: none !important;
+}
+
+.option {
+    display: flex;
+    height: 7.5rem;
+    font-size: 1.75rem;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    box-sizing: border-box;
+    background-color: #1e5320;
+    color: white;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    white-space: normal;
+    word-wrap: break-word;
+    hyphens: auto;
+    padding: 0 10px;
+    line-height: 7.5rem;
+    text-align: center;
+}
+
+.option.hints {
+    font-size: 1.25rem;
+    line-height: 1.2;
+    padding: 10px;
+    word-break: break-word;
+    overflow: hidden; /* Prevent text from displaying outside the button area */
+}
+
+.option:hover:not(.disabled) {
+    background-color: #247028;
+    /* font-size: 30px; */ /* Disabled to prevent resizing */
+}
+
+.option.disabled {
+    background-color: #808080;
+    cursor: default;
+    color: transparent;
+}
+
+.option.disabled.try-again, .option.disabled.hints, .option.try-again, .option.hints {
+    color: white !important;
+}
+
+.option.correct {
+    background-color: #ffd700;
+    color: navy;
+    font-size: 34px;
+    animation: pulsate 0.8s infinite ease-in-out;
+}
+
+.option:focus {
+    outline: 2px solid #3498db;
+    outline-offset: 2px;
+}
+
+.option.disabled:focus {
+    outline: none;
+}
+
+/* Super Button Styles */
+#superButton {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    height: auto;
+    background-color: #1e5320;
+    color: white;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    padding: 10px;
+    box-sizing: border-box;
+    white-space: normal;
+    word-wrap: break-word;
+    hyphens: auto;
+    text-align: center;
+}
+
+#superButton:hover {
+    background-color: #247028;
+}
+
+/* ==================== */
+/* Mode Selector Styles */
+/* ==================== */
+#modeSelector {
+    margin-bottom: 10px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 8px;
+    border-radius: 10px;
+    width: 100%;
+    max-width: 200px;
+    z-index: 10;
+}
+
+#modeSelector select {
+    font-family: 'Patrick Hand', cursive;
+    font-size: 18px;
+    padding: 5px 10px;
+    border: 2px solid #333;
+    border-radius: 5px;
+    background: #fff;
+    cursor: pointer;
+    outline: none;
+    width: 100%;
+}
+
+#modeSelector select:focus {
+    border-color: #3498db;
+}
+
+/* ==================== */
+/* Popup Styles */
+/* ==================== */
+#settingsPopup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1001;
+    display: none;
+}
+
+#settingsPopup .cloud-box {
+    padding: 20px;
+    text-align: left;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 10px;
+}
+
+#settingsPopup h3 {
+    margin-top: 0;
+    font-family: 'Patrick Hand', cursive;
+}
+
+#settingsPopup form {
+    margin-bottom: 10px;
+}
+
+#settingsPopup label {
+    display: block;
+    margin-bottom: 5px;
+    font-family: 'Patrick Hand', cursive;
+}
+
+#settingsPopup button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    font-family: 'Patrick Hand', cursive;
+}
+
+.gear-icon {
+    cursor: pointer;
+    font-size: 20px;
+    margin-left: 10px;
+}
+
+#modeSelector[style*="display: none"] {
+    display: none !important;
+}
+
+/* ==================== */
+/* Message Styles */
+/* ==================== */
+#message {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    font-size: 18px;
+    color: #333;
+    display: none;
+    text-align: center;
+    max-width: 90%;
+}
+
+.cloud-text {
+    background: rgba(255, 255, 255, 0.8);
+    padding: 10px;
+    border-radius: 10px;
+    display: inline-block;
+}
+
+/* ==================== */
+/* Report Card Styles */
+/* ==================== */
+#roundIndicator {
+    font-weight: bold;
+    color: #333;
+}
+
+#reportCard {
+    display: none;
+    margin: 20px;
+}
+
+#reportCard h2 {
+    font-size: 36px;
+    text-align: left;
+}
+
+#reportColumns {
+    display: grid;
+    grid-template-columns: repeat(9, 1fr);
+    gap: 10px;
+}
+
+.report-column {
+    text-align: left;
+}
+
+.missed {
+    color: red;
+}
+
+.percentage {
+    font-family: 'Patrick Hand', cursive;
+    font-size: 18px;
+}
+
+.showMore {
+    color: blue;
+    text-decoration: underline;
+    cursor: pointer;
+    display: block;
+    margin-top: 5px;
+}
+
+/* ==================== */
+/* Button Styles */
+/* ==================== */
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    margin: 5px;
+    cursor: pointer;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 5px;
+}
+
+button:hover {
+    background-color: #2980b9;
+}
+
+/* ==================== */
+/* Full Screen View Styles */
+/* ==================== */
+#fullScreenView {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.8);
+    z-index: 1000;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+#gridContainer {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+#gridContainer div {
+    padding: 10px;
+    text-align: left;
+}
+
+/* ==================== */
+/* Final Message Styles */
+/* ==================== */
+#finalMessage {
+    display: none;
+    text-align: center;
+    padding: 20px;
+}
+
+#grade {
+    font-family: 'Patrick Hand', cursive;
+    font-size: 48px;
+}
+
+/* ==================== */
+/* Score Submission Styles */
+/* ==================== */
+#scoreSubmission {
+    background: white;
+    padding: 20px;
+    border: 1px solid black;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    text-align: center;
+}
+
+#scoreSubmission h3 {
+    margin-bottom: 10px;
+}
+
+#scoreSubmission input {
+    margin-bottom: 10px;
+    padding: 5px;
+    font-size: 16px;
+}
+
+#scoreSubmission button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+/* ==================== */
+/* Top 10 Scoreboard Styles */
+/* ==================== */
+#overallTop10, #speedrunTop10 {
+    background: rgba(255, 255, 255, 0.8);
+    padding: 20px;
+    overflow-y: auto;
+}
+
+#overallTop10 h2, #speedrunTop10 h2 {
+    margin-bottom: 20px;
+}
+
+#overallList, #speedrunList {
+    list-style-position: inside;
+    padding-left: 20px;
+}
+
+#returnFromOverall, #returnFromSpeedrun {
+    margin-top: 20px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+#autoReturnOverall, #autoReturnSpeedrun {
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+.cloud-box {
+    background: rgba(255, 255, 255, 0.8);
+    padding: 20px;
+    border-radius: 10px;
+    margin: 20px auto;
+    max-width: 600px;
+    text-align: center;
+}
+
+/* ==================== */
+/* Media Queries */
+/* ==================== */
+/* Mobile devices (both portrait and landscape) */
+@media (max-width: 900px) {
+    #gameArea {
+        flex-direction: column;
+        height: 100vh;
+        margin: 10px;
+    }
+    #leftSide {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        max-width: none;
+        margin-right: 0;
+        margin-bottom: 10px;
+    }
+    #rightSide {
+        flex: 1;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: repeat(3, 1fr);
+        gap: 10px;
+    }
+    .option {
+        height: auto;
+        min-height: 0;
+        font-size: 1.5rem;
+        padding: 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        line-height: 1.2; /* Improved vertical centering for multi-line text */
+    }
+    #currentImage {
+        max-width: 100%;
+        max-height: 100%;
+        width: auto;
+        height: auto;
+    }
+    #superButton {
+        font-size: 1.25rem;
+        padding: 10px;
+    }
+}
+
+/* Specific adjustments for portrait orientation */
+@media (max-width: 900px) and (orientation: portrait) {
+    body {
+        background-image: url('../assets/background-portrait.jpg');
+    }
+    .option {
+        line-height: 1.2; /* Ensure consistent vertical centering */
+    }
+}
+
+@media (max-width: 480px) {
+    #leftSide, #rightSide {
+        width: 100%;
+    }
+    .option {
+        font-size: 1.25rem;
+        height: 80px;
+    }
+    #superButton {
+        font-size: 1rem;
+    }
+}

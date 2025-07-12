@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - US Presidents Game</title>
+    <link rel="stylesheet" href="../css/settings.css">
+</head>
+<body>
+    <div id="settingsContainer">
+        <h1>Settings</h1>
+        <form id="settingsForm">
+            <fieldset>
+                <legend>Mode</legend>
+                <label>
+                    <input type="radio" name="mode" value="years"> Term Years
+                </label>
+                <label>
+                    <input type="radio" name="mode" value="number"> # President
+                </label>
+            </fieldset>
+            <fieldset>
+                <legend>Difficulty Level</legend>
+                <label>
+                    <input type="radio" name="difficulty" value="3"> Level 3 (3 options)
+                </label>
+                <label>
+                    <input type="radio" name="difficulty" value="4"> Level 4 (4 options)
+                </label>
+                <label>
+                    <input type="radio" name="difficulty" value="5"> Level 5 (5 options)
+                </label>
+                <label>
+                    <input type="radio" name="difficulty" value="6"> Level 6 (6 options)
+                </label>
+            </fieldset>
+            <button type="button" id="saveButton">Save</button>
+            <button type="button" id="backButton">Back to Main Menu</button>
+        </form>
+    </div>
+    <script src="../js/settings.js"></script>
+</body>
+</html>

@@ -1,0 +1,141 @@
+{
+  "type": "folder",
+  "name": "root",
+  "children": [
+    {
+      "type": "folder",
+      "name": "html",
+      "children": [
+        {
+          "type": "file",
+          "name": "add_more_cards.html"
+        },
+        {
+          "type": "file",
+          "name": "leaderboard.html"
+        },
+        {
+          "type": "file",
+          "name": "more_games.html"
+        },
+        {
+          "type": "file",
+          "name": "new_game.html"
+        },
+        {
+          "type": "file",
+          "name": "review.html"
+        },
+        {
+          "type": "file",
+          "name": "settings.html"
+        }
+      ]
+    },
+    {
+      "type": "folder",
+      "name": "css",
+      "children": [
+        {
+          "type": "file",
+          "name": "main_menu.css"
+        },
+        {
+          "type": "file",
+          "name": "add_more_cards.css"
+        },
+        {
+          "type": "file",
+          "name": "leaderboard.css"
+        },
+        {
+          "type": "file",
+          "name": "more_games.css"
+        },
+        {
+          "type": "file",
+          "name": "new_game.css"
+        },
+        {
+          "type": "file",
+          "name": "review.css"
+        },
+        {
+          "type": "file",
+          "name": "settings.css"
+        }
+      ]
+    },
+    {
+      "type": "folder",
+      "name": "js",
+      "children": [
+        {
+          "type": "file",
+          "name": "main_menu.js"
+        },
+        {
+          "type": "file",
+          "name": "add_more_cards.js"
+        },
+        {
+          "type": "file",
+          "name": "leaderboard.js"
+        },
+        {
+          "type": "file",
+          "name": "more_games.js"
+        },
+        {
+          "type": "file",
+          "name": "new_game.js"
+        },
+        {
+          "type": "file",
+          "name": "review.js"
+        },
+        {
+          "type": "file",
+          "name": "settings.js"
+        }
+      ]
+    },
+    {
+      "type": "folder",
+      "name": "assets",
+      "children": [
+        {
+          "type": "folder",
+          "name": "cards",
+          "children": []
+        },
+        {
+          "type": "file",
+          "name": "background-landscape.jpg"
+        },
+        {
+          "type": "file",
+          "name": "background-portrait.jpg"
+        }
+      ]
+    },
+    {
+      "type": "folder",
+      "name": "json",
+      "children": [
+        {
+          "type": "file",
+          "name": "presidents.json"
+        },
+        {
+          "type": "file",
+          "name": "yearly_accomplishments.json"
+        }
+      ]
+    },
+    {
+      "type": "file",
+      "name": "main_menu.html"
+    }
+  ]
+}
