@@ -266,6 +266,9 @@
                             e.dataTransfer.setData("card", JSON.stringify(card));
                             e.dataTransfer.setData("player", visIndex);
                         };
+                        // NEW: Add dataset for touch dragging
+                        cardDiv.dataset.card = JSON.stringify(card);
+                        cardDiv.dataset.player = visIndex;
                         cardDiv.addEventListener('touchstart', handleTouchStart, {passive: false});
                         handDiv.appendChild(cardDiv);
                     });
@@ -290,6 +293,11 @@
                         e.dataTransfer.setData("card", JSON.stringify(p.incoming[0]));
                         e.dataTransfer.setData("player", visIndex);
                     };
+                    // NEW: Add dataset for touch dragging (only if user, since draggable)
+                    if (p.isUser) {
+                        cardDiv.dataset.card = JSON.stringify(p.incoming[0]);
+                        cardDiv.dataset.player = visIndex;
+                    }
                     cardDiv.addEventListener('touchstart', handleTouchStart, {passive: false});
                     incomingDiv.innerHTML = '';
                     incomingDiv.appendChild(cardDiv);
@@ -378,7 +386,7 @@
             if (elem.getAttribute("draggable") === "true") {
                 dragged = {};
                 dragClone = elem.cloneNode(true);
-                dragClone.style.position = 'fixed';
+                dragClone.style.position = 'fixed'; // Changed to fixed for better touch handling
                 dragClone.style.pointerEvents = 'none';
                 dragClone.style.zIndex = '1000';
                 dragClone.style.opacity = '0.5';
@@ -387,7 +395,8 @@
                 if (elem.classList.contains('spoon')) {
                     dragged.spoon = elem.id.replace('spoon', '');
                 } else {
-                    dragged.card = elem.dataset.value;
+                    // FIXED: Use dataset.card instead of dataset.value
+                    dragged.card = elem.dataset.card;
                     dragged.player = elem.dataset.player;
                 }
             }
@@ -425,13 +434,20 @@
         }
 
         function moveClone(touch) {
-            dragClone.style.left = `${touch.clientX - dragClone.offsetWidth / 2}px`;
-            dragClone.style.top = `${touch.clientY - dragClone.offsetHeight / 2}px`;
+            // IMPROVED: Use transform for smoother dragging on touch devices
+            dragClone.style.transform = `translate(${touch.clientX - dragClone.offsetWidth / 2}px, ${touch.clientY - dragClone.offsetHeight / 2}px)`;
         }
 
         document.addEventListener('touchmove', handleTouchMove, {passive: false});
         document.addEventListener('touchend', handleTouchEnd, {passive: false});
         document.addEventListener('touchcancel', handleTouchEnd, {passive: false});
+
+        // NEW: Wire up the start button for both mouse and touch
+        document.getElementById('startButton').addEventListener('click', startGame);
+        document.getElementById('startButton').addEventListener('touchend', (e) => {
+            e.preventDefault();
+            startGame();
+        });
     </script>
 </body>
 </html>
