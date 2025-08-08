@@ -38,7 +38,7 @@
             <option value="11">11</option>
             <option value="12">12</option>
         </select>
-        <button onclick="startGame()">Start Game</button>
+        <button id="startButton">Start Game</button>
     </div>
     <div id="table" style="display:none;">
         <div>Spoons: <div id="spoons"></div></div>
@@ -189,9 +189,6 @@
             players.forEach((p, i) => {
                 if (!p.isUser) aiAction(i);
             });
-            document.addEventListener('touchmove', (e) => {
-                if (dragged) e.preventDefault();
-            }, {passive: false});
         }
 
         function getVisibleIndices() {
@@ -222,12 +219,6 @@
             getVisibleIndices().forEach(visIndex => {
                 let playerDiv = document.getElementById(`player${visIndex}`);
                 playerDiv.innerHTML = `<h2>${visIndex === userIndex ? "You" : visIndex === (userIndex - 1 + numPlayers) % numPlayers ? "Left Neighbor" : "Right Neighbor"} (${players[visIndex].score || "No letters"})</h2><div class="incoming" id="incoming${visIndex}">Incoming</div><div class="hand" id="hand${visIndex}">Hand</div>`;
-                let handDiv = document.getElementById(`hand${visIndex}`);
-                let incomingDiv = document.getElementById(`incoming${visIndex}`);
-                handDiv.addEventListener('touchend', simulateDrop);
-                incomingDiv.addEventListener('touchend', simulateDrop);
-                handDiv.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
-                incomingDiv.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
             });
         }
 
@@ -243,10 +234,9 @@
                 spoon.ondragstart = (e) => {
                     if (!gameOver) return;
                     e.dataTransfer.setData("spoon", s);
-                    dragged = {spoon: s.toString()};
                 };
                 spoon.dataset.type = 'spoon';
-                spoon.dataset.value = s.toString();
+                spoon.dataset.value = s;
                 spoon.addEventListener('touchstart', handleTouchStart, {passive: false});
                 spoonsDiv.appendChild(spoon);
             });
@@ -267,11 +257,10 @@
                         cardDiv.ondragstart = (e) => {
                             e.dataTransfer.setData("card", JSON.stringify(card));
                             e.dataTransfer.setData("player", visIndex);
-                            dragged = {card: JSON.stringify(card), player: visIndex.toString()};
                         };
                         cardDiv.dataset.type = 'card';
                         cardDiv.dataset.value = JSON.stringify(card);
-                        cardDiv.dataset.player = visIndex.toString();
+                        cardDiv.dataset.player = visIndex;
                         cardDiv.addEventListener('touchstart', handleTouchStart, {passive: false});
                         handDiv.appendChild(cardDiv);
                     });
@@ -295,11 +284,10 @@
                     cardDiv.ondragstart = (e) => {
                         e.dataTransfer.setData("card", JSON.stringify(p.incoming[0]));
                         e.dataTransfer.setData("player", visIndex);
-                        dragged = {card: JSON.stringify(p.incoming[0]), player: visIndex.toString()};
                     };
                     cardDiv.dataset.type = 'card';
                     cardDiv.dataset.value = JSON.stringify(p.incoming[0]);
-                    cardDiv.dataset.player = visIndex.toString();
+                    cardDiv.dataset.player = visIndex;
                     cardDiv.addEventListener('touchstart', handleTouchStart, {passive: false});
                     incomingDiv.innerHTML = '';
                     incomingDiv.appendChild(cardDiv);
@@ -345,6 +333,8 @@
                         }
                     }
                 };
+                handDiv.addEventListener('touchend', simulateDrop);
+                incomingDiv.addEventListener('touchend', simulateDrop);
             });
         }
 
@@ -393,6 +383,7 @@
                     dragged.card = elem.dataset.value;
                     dragged.player = elem.dataset.player;
                 }
+                elem.style.opacity = '0.5';
             }
         }
 
@@ -403,14 +394,19 @@
                     preventDefault: () => {},
                     dataTransfer: {
                         getData: (key) => dragged[key] || ''
-                    }
+                    },
+                    target: e.target
                 };
                 e.target.closest('.hand, .incoming').ondrop(fakeE);
                 dragged = null;
             }
         }
 
-        document.addEventListener('touchend', simulateDrop, {passive: false});
+        document.getElementById('startButton').addEventListener('click', startGame);
+        document.getElementById('startButton').addEventListener('touchend', (e) => {
+            e.preventDefault();
+            startGame();
+        });
     </script>
 </body>
 </html>
