@@ -40,12 +40,7 @@
         </select>
         <button onclick="startGame()">Start Game</button>
     </div>
-    <p id="instructions">You are "You". The dealer AI will automatically draw and pass cards around the circle. When a face-down card appears in your "Incoming" area, drag it to your "Hand" area to add and reveal it. Then, immediately drag one card from your hand to the next player's (Right Neighbor) "Incoming" area to pass it (it will become face-down for them).</p>
-    <p id="instructions2">When someone gets four of a kind, the spoons (🥄) become draggable—quickly drag one to your "Hand" area to grab it! AI players will try to grab too. The player without a spoon gets a letter toward "S-P-O-O-N-S".</p>
-    <p id="instructions3">Opponent hands show backs only. Game runs in real-time with AI delays simulating speed. Only your neighbors are shown; others are simulated.</p>
     <div id="table" style="display:none;">
-        <div>Draw pile: <span id="drawCount"></span></div>
-        <div>Discard pile: <span id="discardCount"></span></div>
         <div>Spoons: <div id="spoons"></div></div>
     </div>
     <div id="players" style="display:none;"></div>
@@ -177,9 +172,6 @@
             }));
             spoons = Array.from({length: numPlayers - 1}, (_, i) => i + 1);
             document.getElementById('setup').style.display = 'none';
-            document.getElementById('instructions').style.display = 'none';
-            document.getElementById('instructions2').style.display = 'none';
-            document.getElementById('instructions3').style.display = 'none';
             document.getElementById('table').style.display = 'flex';
             document.getElementById('players').style.display = 'flex';
             const playersDiv = document.getElementById('players');
@@ -216,7 +208,7 @@
                 p.hand = [];
                 p.incoming = [];
                 p.hasSpoon = false;
-                for (let i = 0; i = 4; i++) {
+                for (let i = 0; i < 4; i++) {
                     p.hand.push(drawPile.pop());
                 }
             });
@@ -230,8 +222,6 @@
         }
 
         function updateDisplay() {
-            document.getElementById('drawCount').innerText = drawPile.length;
-            document.getElementById('discardCount').innerText = discardPile.length;
             let spoonsDiv = document.getElementById('spoons');
             spoonsDiv.innerHTML = '';
             spoons.forEach(s => {
