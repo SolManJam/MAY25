@@ -55,6 +55,7 @@
         let gameOver = false;
         let dragged = null;
         let dragClone = null;
+        let updatePending = false;
 
         const suits = ["spades", "diamonds", "clubs", "hearts"];
         const values = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"];
@@ -144,13 +145,13 @@
                 if (loserIndex !== -1) {
                     let loser = players[loserIndex];
                     loser.score += loser.score.length < 6 ? "SPOONS"[loser.score.length] : "";
-                    updateDisplay();
+                    scheduleUpdate();
                     alert(`Round over! ${loser.name} gets a letter: ${loser.score}. Click "Restart Round" to play again.`);
                     let restartBtn = document.createElement('button');
                     restartBtn.innerText = 'Restart Round';
                     restartBtn.onclick = () => {
                         resetRound();
-                        updateDisplay();
+                        scheduleUpdate();
                         players.forEach((p, i) => {
                             if (!p.isUser) aiAction(i);
                         });
@@ -159,7 +160,7 @@
                     restartBtn.addEventListener('touchend', (e) => {
                         e.preventDefault();
                         resetRound();
-                        updateDisplay();
+                        scheduleUpdate();
                         players.forEach((p, i) => {
                             if (!p.isUser) aiAction(i);
                         });
@@ -195,7 +196,7 @@
                 playersDiv.appendChild(playerDiv);
             });
             resetRound();
-            updateDisplay();
+            scheduleUpdate();
             players.forEach((p, i) => {
                 if (!p.isUser) aiAction(i);
             });
@@ -232,8 +233,18 @@
             gameOver = false;
             getVisibleIndices().forEach(visIndex => {
                 let playerDiv = document.getElementById(`player${visIndex}`);
-                playerDiv.innerHTML = `<h2>${visIndex === userIndex ? "You" : visIndex === (userIndex - 1 + numPlayers) % numPlayers ? "Left Neighbor" : "Right Neighbor"} (${players[visIndex].score || "No letters"})</h2><div class="incoming" id="incoming${visIndex}">Incoming</div><div class="hand" id="hand${visIndex}"></div>`; // Removed initial 'Hand' text
+                playerDiv.innerHTML = `<h2>${visIndex === userIndex ? "You" : visIndex === (userIndex - 1 + numPlayers) % numPlayers ? "Left Neighbor" : "Right Neighbor"} (${players[visIndex].score || "No letters"})</h2><div class="incoming" id="incoming${visIndex}">Incoming</div><div class="hand" id="hand${visIndex}"></div>`;
             });
+        }
+
+        function scheduleUpdate() {
+            if (!updatePending) {
+                updatePending = true;
+                requestAnimationFrame(() => {
+                    updateDisplay();
+                    updatePending = false;
+                });
+            }
         }
 
         function updateDisplay() {
@@ -319,7 +330,7 @@
                     if (fromPlayer === prevIndex) {
                         p.incoming.push(card);
                         players[fromPlayer].hand = players[fromPlayer].hand.filter(c => c.Value !== card.Value || c.Suit !== card.Suit);
-                        updateDisplay();
+                        scheduleUpdate();
                     }
                 };
                 handDiv.ondrop = (e) => {
@@ -332,7 +343,7 @@
                             spoons = spoons.filter(s => s !== spoonId);
                             document.getElementById(`spoon${spoonId}`).remove();
                             p.hasSpoon = true;
-                            updateDisplay();
+                            scheduleUpdate();
                             checkRoundEnd();
                         }
                     } else if (cardStr) {
@@ -341,7 +352,7 @@
                         if (fromPlayer === visIndex && p.isUser && p.incoming.length > 0 && p.hand.length < 5) {
                             p.hand.push(p.incoming.shift());
                             checkFourOfKind(p, visIndex);
-                            updateDisplay();
+                            scheduleUpdate();
                         }
                     }
                 };
@@ -363,7 +374,7 @@
                     } else {
                         players[nextIndex].incoming.push(discard);
                     }
-                    updateDisplay();
+                    scheduleUpdate();
                     if (playerIndex === 0 && !gameOver) {
                         if (drawPile.length === 0) {
                             drawPile = discardPile;
@@ -371,7 +382,7 @@
                             shuffle(drawPile);
                         }
                         p.incoming.push(drawPile.pop());
-                        updateDisplay();
+                        scheduleUpdate();
                     }
                     if (!gameOver) {
                         setTimeout(() => aiAction(playerIndex), Math.random() * 2000 + 1000);
@@ -398,6 +409,7 @@
                 dragClone.style.pointerEvents = 'none';
                 dragClone.style.zIndex = '1000';
                 dragClone.style.opacity = '0.5';
+                dragClone.style.willChange = 'transform';
                 document.body.appendChild(dragClone);
                 moveClone(e.touches[0]);
                 if (elem.classList.contains('spoon')) {
@@ -439,12 +451,12 @@
                     dragClone.remove();
                     dragClone = null;
                 }
+                dragged = null;
             }
-            dragged = null;
         }
 
         function moveClone(touch) {
-            dragClone.style.transform = `translate(${touch.clientX - dragClone.offsetWidth / 2}px, ${touch.clientY - dragClone.offsetHeight / 2}px)`;
+            dragClone.style.transform = `translate(${touch.clientX - dragClone.offsetWidth / 2}px, ${touch.clientY - dragClone.offsetHeight - 10}px)`; // Offset above finger for better visibility
         }
 
         // Wire up the start button for both mouse and touch
