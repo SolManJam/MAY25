@@ -12,8 +12,8 @@
         .spoon { font-size: 30px; margin: 5px; cursor: grab; }
         #players { display: flex; justify-content: space-around; width: 100%; flex-wrap: wrap; }
         .player { border: 1px solid #ccc; padding: 10px; margin: 10px; width: 250px; text-align: center; }
-        .hand { min-height: 200px; border: 1px dashed gray; display: flex; flex-wrap: wrap; justify-content: center; }
-        .incoming { min-height: 150px; border: 1px dotted blue; margin: 10px 0; text-align: center; display: flex; align-items: center; justify-content: center; }
+        .hand { min-height: 250px; border: 1px dashed gray; display: flex; flex-wrap: wrap; justify-content: center; background: rgba(0, 255, 0, 0.05); } /* Light background for visibility */
+        .incoming { min-height: 200px; border: 1px dotted blue; margin: 10px 0; text-align: center; display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 255, 0.05); } /* Light background for visibility */
         .card { width: 50px; height: 70px; margin: 5px; border: 1px solid black; text-align: center; line-height: 70px; cursor: grab; }
         .card.red { color: red; background: white; }
         .card.black { color: black; background: white; }
@@ -232,7 +232,7 @@
             gameOver = false;
             getVisibleIndices().forEach(visIndex => {
                 let playerDiv = document.getElementById(`player${visIndex}`);
-                playerDiv.innerHTML = `<h2>${visIndex === userIndex ? "You" : visIndex === (userIndex - 1 + numPlayers) % numPlayers ? "Left Neighbor" : "Right Neighbor"} (${players[visIndex].score || "No letters"})</h2><div class="incoming" id="incoming${visIndex}">Incoming</div><div class="hand" id="hand${visIndex}">Hand</div>`;
+                playerDiv.innerHTML = `<h2>${visIndex === userIndex ? "You" : visIndex === (userIndex - 1 + numPlayers) % numPlayers ? "Left Neighbor" : "Right Neighbor"} (${players[visIndex].score || "No letters"})</h2><div class="incoming" id="incoming${visIndex}">Incoming</div><div class="hand" id="hand${visIndex}"></div>`; // Removed initial 'Hand' text
             });
         }
 
@@ -386,9 +386,15 @@
             e.preventDefault();
             let elem = e.target;
             if (elem.getAttribute("draggable") === "true") {
+                if (dragClone) {
+                    dragClone.remove();
+                    dragClone = null;
+                }
                 dragged = {};
                 dragClone = elem.cloneNode(true);
                 dragClone.style.position = 'fixed';
+                dragClone.style.left = '0px';
+                dragClone.style.top = '0px';
                 dragClone.style.pointerEvents = 'none';
                 dragClone.style.zIndex = '1000';
                 dragClone.style.opacity = '0.5';
@@ -416,11 +422,10 @@
                 let clientX = e.changedTouches[0].clientX;
                 let clientY = e.changedTouches[0].clientY;
                 if (dragClone) {
-                    dragClone.remove();
-                    dragClone = null;
+                    dragClone.style.display = 'none'; // Hide first to reveal underlying elements
                 }
                 let target = document.elementFromPoint(clientX, clientY);
-                let dropArea = target.closest('.hand, .incoming');
+                let dropArea = target ? target.closest('.hand, .incoming') : null;
                 if (dropArea) {
                     let fakeE = {
                         preventDefault: () => {},
@@ -430,13 +435,16 @@
                     };
                     dropArea.ondrop(fakeE);
                 }
+                if (dragClone) {
+                    dragClone.remove();
+                    dragClone = null;
+                }
             }
             dragged = null;
         }
 
         function moveClone(touch) {
-            dragClone.style.left = `${touch.clientX - dragClone.offsetWidth / 2}px`;
-            dragClone.style.top = `${touch.clientY - dragClone.offsetHeight / 2}px`;
+            dragClone.style.transform = `translate(${touch.clientX - dragClone.offsetWidth / 2}px, ${touch.clientY - dragClone.offsetHeight / 2}px)`;
         }
 
         // Wire up the start button for both mouse and touch
