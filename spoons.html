@@ -53,6 +53,7 @@
         let players = [];
         let spoons = [];
         let gameOver = false;
+        let dragged = null;
 
         const suits = ["spades", "diamonds", "clubs", "hearts"];
         const values = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"];
@@ -188,6 +189,9 @@
             players.forEach((p, i) => {
                 if (!p.isUser) aiAction(i);
             });
+            document.addEventListener('touchmove', (e) => {
+                if (dragged) e.preventDefault();
+            }, {passive: false});
         }
 
         function getVisibleIndices() {
@@ -218,6 +222,12 @@
             getVisibleIndices().forEach(visIndex => {
                 let playerDiv = document.getElementById(`player${visIndex}`);
                 playerDiv.innerHTML = `<h2>${visIndex === userIndex ? "You" : visIndex === (userIndex - 1 + numPlayers) % numPlayers ? "Left Neighbor" : "Right Neighbor"} (${players[visIndex].score || "No letters"})</h2><div class="incoming" id="incoming${visIndex}">Incoming</div><div class="hand" id="hand${visIndex}">Hand</div>`;
+                let handDiv = document.getElementById(`hand${visIndex}`);
+                let incomingDiv = document.getElementById(`incoming${visIndex}`);
+                handDiv.addEventListener('touchend', simulateDrop);
+                incomingDiv.addEventListener('touchend', simulateDrop);
+                handDiv.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
+                incomingDiv.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
             });
         }
 
@@ -233,8 +243,11 @@
                 spoon.ondragstart = (e) => {
                     if (!gameOver) return;
                     e.dataTransfer.setData("spoon", s);
+                    dragged = {spoon: s.toString()};
                 };
-                enableTouchDrag(spoon);
+                spoon.dataset.type = 'spoon';
+                spoon.dataset.value = s.toString();
+                spoon.addEventListener('touchstart', handleTouchStart, {passive: false});
                 spoonsDiv.appendChild(spoon);
             });
             getVisibleIndices().forEach(visIndex => {
@@ -254,8 +267,12 @@
                         cardDiv.ondragstart = (e) => {
                             e.dataTransfer.setData("card", JSON.stringify(card));
                             e.dataTransfer.setData("player", visIndex);
+                            dragged = {card: JSON.stringify(card), player: visIndex.toString()};
                         };
-                        enableTouchDrag(cardDiv);
+                        cardDiv.dataset.type = 'card';
+                        cardDiv.dataset.value = JSON.stringify(card);
+                        cardDiv.dataset.player = visIndex.toString();
+                        cardDiv.addEventListener('touchstart', handleTouchStart, {passive: false});
                         handDiv.appendChild(cardDiv);
                     });
                 } else {
@@ -278,8 +295,12 @@
                     cardDiv.ondragstart = (e) => {
                         e.dataTransfer.setData("card", JSON.stringify(p.incoming[0]));
                         e.dataTransfer.setData("player", visIndex);
+                        dragged = {card: JSON.stringify(p.incoming[0]), player: visIndex.toString()};
                     };
-                    enableTouchDrag(cardDiv);
+                    cardDiv.dataset.type = 'card';
+                    cardDiv.dataset.value = JSON.stringify(p.incoming[0]);
+                    cardDiv.dataset.player = visIndex.toString();
+                    cardDiv.addEventListener('touchstart', handleTouchStart, {passive: false});
                     incomingDiv.innerHTML = '';
                     incomingDiv.appendChild(cardDiv);
                 }
@@ -361,27 +382,35 @@
             }
         }
 
-        function enableTouchDrag(element) {
-            element.addEventListener('touchstart', touchHandler, {passive: false});
-            element.addEventListener('touchmove', touchHandler, {passive: false});
-            element.addEventListener('touchend', touchHandler, {passive: false});
+        function handleTouchStart(e) {
+            e.preventDefault();
+            let elem = e.target;
+            if (elem.getAttribute("draggable") === "true") {
+                dragged = {};
+                if (elem.dataset.type === 'spoon') {
+                    dragged.spoon = elem.dataset.value;
+                } else if (elem.dataset.type === 'card') {
+                    dragged.card = elem.dataset.value;
+                    dragged.player = elem.dataset.player;
+                }
+            }
         }
 
-        function touchHandler(event) {
-            var touch = event.changedTouches[0];
-            var simulatedEvent = document.createEvent("MouseEvent");
-            simulatedEvent.initMouseEvent({
-                touchstart: "mousedown",
-                touchmove: "mousemove",
-                touchend: "mouseup"
-            }[event.type], true, true, window, 1,
-                touch.screenX, touch.screenY,
-                touch.clientX, touch.clientY, false,
-                false, false, false, 0, null);
-
-            touch.target.dispatchEvent(simulatedEvent);
-            event.preventDefault();
+        function simulateDrop(e) {
+            e.preventDefault();
+            if (dragged) {
+                let fakeE = {
+                    preventDefault: () => {},
+                    dataTransfer: {
+                        getData: (key) => dragged[key] || ''
+                    }
+                };
+                e.target.closest('.hand, .incoming').ondrop(fakeE);
+                dragged = null;
+            }
         }
+
+        document.addEventListener('touchend', simulateDrop, {passive: false});
     </script>
 </body>
 </html>
