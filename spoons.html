@@ -38,7 +38,7 @@
             <option value="11">11</option>
             <option value="12">12</option>
         </select>
-        <button id="startButton">Start Game</button>
+        <button onclick="startGame()">Start Game</button>
     </div>
     <div id="table" style="display:none;">
         <div>Spoons: <div id="spoons"></div></div>
@@ -54,6 +54,7 @@
         let spoons = [];
         let gameOver = false;
         let dragged = null;
+        let dragClone = null;
 
         const suits = ["spades", "diamonds", "clubs", "hearts"];
         const values = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"];
@@ -235,8 +236,6 @@
                     if (!gameOver) return;
                     e.dataTransfer.setData("spoon", s);
                 };
-                spoon.dataset.type = 'spoon';
-                spoon.dataset.value = s;
                 spoon.addEventListener('touchstart', handleTouchStart, {passive: false});
                 spoonsDiv.appendChild(spoon);
             });
@@ -258,9 +257,6 @@
                             e.dataTransfer.setData("card", JSON.stringify(card));
                             e.dataTransfer.setData("player", visIndex);
                         };
-                        cardDiv.dataset.type = 'card';
-                        cardDiv.dataset.value = JSON.stringify(card);
-                        cardDiv.dataset.player = visIndex;
                         cardDiv.addEventListener('touchstart', handleTouchStart, {passive: false});
                         handDiv.appendChild(cardDiv);
                     });
@@ -285,9 +281,6 @@
                         e.dataTransfer.setData("card", JSON.stringify(p.incoming[0]));
                         e.dataTransfer.setData("player", visIndex);
                     };
-                    cardDiv.dataset.type = 'card';
-                    cardDiv.dataset.value = JSON.stringify(p.incoming[0]);
-                    cardDiv.dataset.player = visIndex;
                     cardDiv.addEventListener('touchstart', handleTouchStart, {passive: false});
                     incomingDiv.innerHTML = '';
                     incomingDiv.appendChild(cardDiv);
@@ -333,8 +326,6 @@
                         }
                     }
                 };
-                handDiv.addEventListener('touchend', simulateDrop);
-                incomingDiv.addEventListener('touchend', simulateDrop);
             });
         }
 
@@ -377,36 +368,59 @@
             let elem = e.target;
             if (elem.getAttribute("draggable") === "true") {
                 dragged = {};
-                if (elem.dataset.type === 'spoon') {
-                    dragged.spoon = elem.dataset.value;
-                } else if (elem.dataset.type === 'card') {
+                dragClone = elem.cloneNode(true);
+                dragClone.style.position = 'fixed';
+                dragClone.style.pointerEvents = 'none';
+                dragClone.style.zIndex = '1000';
+                dragClone.style.opacity = '0.5';
+                document.body.appendChild(dragClone);
+                moveClone(e.touches[0]);
+                if (elem.classList.contains('spoon')) {
+                    dragged.spoon = elem.id.replace('spoon', '');
+                } else {
                     dragged.card = elem.dataset.value;
                     dragged.player = elem.dataset.player;
                 }
-                elem.style.opacity = '0.5';
             }
         }
 
-        function simulateDrop(e) {
+        function handleTouchMove(e) {
+            e.preventDefault();
+            if (dragClone) {
+                moveClone(e.touches[0]);
+            }
+        }
+
+        function handleTouchEnd(e) {
             e.preventDefault();
             if (dragged) {
-                let fakeE = {
-                    preventDefault: () => {},
-                    dataTransfer: {
-                        getData: (key) => dragged[key] || ''
-                    },
-                    target: e.target
-                };
-                e.target.closest('.hand, .incoming').ondrop(fakeE);
-                dragged = null;
+                let target = document.elementFromPoint(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+                let dropArea = target.closest('.hand, .incoming');
+                if (dropArea) {
+                    let fakeE = {
+                        preventDefault: () => {},
+                        dataTransfer: {
+                            getData: (key) => dragged[key] || ''
+                        }
+                    };
+                    dropArea.ondrop(fakeE);
+                }
             }
+            if (dragClone) {
+                dragClone.remove();
+                dragClone = null;
+            }
+            dragged = null;
         }
 
-        document.getElementById('startButton').addEventListener('click', startGame);
-        document.getElementById('startButton').addEventListener('touchend', (e) => {
-            e.preventDefault();
-            startGame();
-        });
+        function moveClone(touch) {
+            dragClone.style.left = `${touch.clientX - dragClone.offsetWidth / 2}px`;
+            dragClone.style.top = `${touch.clientY - dragClone.offsetHeight / 2}px`;
+        }
+
+        document.addEventListener('touchmove', handleTouchMove, {passive: false});
+        document.addEventListener('touchend', handleTouchEnd, {passive: false});
+        document.addEventListener('touchcancel', handleTouchEnd, {passive: false});
     </script>
 </body>
 </html>
