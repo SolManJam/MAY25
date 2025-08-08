@@ -12,8 +12,8 @@
         .spoon { font-size: 30px; margin: 5px; cursor: grab; }
         #players { display: flex; justify-content: space-around; width: 100%; flex-wrap: wrap; }
         .player { border: 1px solid #ccc; padding: 10px; margin: 10px; width: 250px; text-align: center; }
-        .hand { min-height: 100px; border: 1px dashed gray; display: flex; flex-wrap: wrap; justify-content: center; }
-        .incoming { min-height: 80px; border: 1px dotted blue; margin: 10px 0; text-align: center; display: flex; align-items: center; justify-content: center; }
+        .hand { min-height: 200px; border: 1px dashed gray; display: flex; flex-wrap: wrap; justify-content: center; }
+        .incoming { min-height: 150px; border: 1px dotted blue; margin: 10px 0; text-align: center; display: flex; align-items: center; justify-content: center; }
         .card { width: 50px; height: 70px; margin: 5px; border: 1px solid black; text-align: center; line-height: 70px; cursor: grab; }
         .card.red { color: red; background: white; }
         .card.black { color: black; background: white; }
@@ -199,6 +199,10 @@
             players.forEach((p, i) => {
                 if (!p.isUser) aiAction(i);
             });
+            // Add document touch listeners here to avoid interfering with initial screen dropdown
+            document.addEventListener('touchmove', handleTouchMove, {passive: false});
+            document.addEventListener('touchend', handleTouchEnd, {passive: false});
+            document.addEventListener('touchcancel', handleTouchEnd, {passive: false});
         }
 
         function getVisibleIndices() {
@@ -266,7 +270,6 @@
                             e.dataTransfer.setData("card", JSON.stringify(card));
                             e.dataTransfer.setData("player", visIndex);
                         };
-                        // NEW: Add dataset for touch dragging
                         cardDiv.dataset.card = JSON.stringify(card);
                         cardDiv.dataset.player = visIndex;
                         cardDiv.addEventListener('touchstart', handleTouchStart, {passive: false});
@@ -293,7 +296,6 @@
                         e.dataTransfer.setData("card", JSON.stringify(p.incoming[0]));
                         e.dataTransfer.setData("player", visIndex);
                     };
-                    // NEW: Add dataset for touch dragging (only if user, since draggable)
                     if (p.isUser) {
                         cardDiv.dataset.card = JSON.stringify(p.incoming[0]);
                         cardDiv.dataset.player = visIndex;
@@ -386,7 +388,7 @@
             if (elem.getAttribute("draggable") === "true") {
                 dragged = {};
                 dragClone = elem.cloneNode(true);
-                dragClone.style.position = 'fixed'; // Changed to fixed for better touch handling
+                dragClone.style.position = 'fixed';
                 dragClone.style.pointerEvents = 'none';
                 dragClone.style.zIndex = '1000';
                 dragClone.style.opacity = '0.5';
@@ -395,7 +397,6 @@
                 if (elem.classList.contains('spoon')) {
                     dragged.spoon = elem.id.replace('spoon', '');
                 } else {
-                    // FIXED: Use dataset.card instead of dataset.value
                     dragged.card = elem.dataset.card;
                     dragged.player = elem.dataset.player;
                 }
@@ -434,15 +435,11 @@
         }
 
         function moveClone(touch) {
-            // IMPROVED: Use transform for smoother dragging on touch devices
-            dragClone.style.transform = `translate(${touch.clientX - dragClone.offsetWidth / 2}px, ${touch.clientY - dragClone.offsetHeight / 2}px)`;
+            dragClone.style.left = `${touch.clientX - dragClone.offsetWidth / 2}px`;
+            dragClone.style.top = `${touch.clientY - dragClone.offsetHeight / 2}px`;
         }
 
-        document.addEventListener('touchmove', handleTouchMove, {passive: false});
-        document.addEventListener('touchend', handleTouchEnd, {passive: false});
-        document.addEventListener('touchcancel', handleTouchEnd, {passive: false});
-
-        // NEW: Wire up the start button for both mouse and touch
+        // Wire up the start button for both mouse and touch
         document.getElementById('startButton').addEventListener('click', startGame);
         document.getElementById('startButton').addEventListener('touchend', (e) => {
             e.preventDefault();
