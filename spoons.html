@@ -38,7 +38,7 @@
             <option value="11">11</option>
             <option value="12">12</option>
         </select>
-        <button onclick="startGame()">Start Game</button>
+        <button id="startButton">Start Game</button>
     </div>
     <div id="table" style="display:none;">
         <div>Spoons: <div id="spoons"></div></div>
@@ -156,6 +156,15 @@
                         });
                         restartBtn.remove();
                     };
+                    restartBtn.addEventListener('touchend', (e) => {
+                        e.preventDefault();
+                        resetRound();
+                        updateDisplay();
+                        players.forEach((p, i) => {
+                            if (!p.isUser) aiAction(i);
+                        });
+                        restartBtn.remove();
+                    });
                     document.body.appendChild(restartBtn);
                 }
             }
@@ -394,7 +403,13 @@
         function handleTouchEnd(e) {
             e.preventDefault();
             if (dragged) {
-                let target = document.elementFromPoint(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+                let clientX = e.changedTouches[0].clientX;
+                let clientY = e.changedTouches[0].clientY;
+                if (dragClone) {
+                    dragClone.remove();
+                    dragClone = null;
+                }
+                let target = document.elementFromPoint(clientX, clientY);
                 let dropArea = target.closest('.hand, .incoming');
                 if (dropArea) {
                     let fakeE = {
@@ -405,10 +420,6 @@
                     };
                     dropArea.ondrop(fakeE);
                 }
-            }
-            if (dragClone) {
-                dragClone.remove();
-                dragClone = null;
             }
             dragged = null;
         }
