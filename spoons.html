@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Improved Spoons Demo</title>
+    <style>
+        body { font-family: Arial, sans-serif; display: flex; flex-direction: column; align-items: center; }
+        #setup { margin: 20px; }
+        #table { display: flex; justify-content: space-around; width: 100%; max-width: 800px; margin: 20px; }
+        #table > div { margin: 10px; text-align: center; }
+        #spoons { display: flex; justify-content: center; }
+        .spoon { font-size: 30px; margin: 5px; cursor: grab; }
+        #players { display: flex; justify-content: space-around; width: 100%; flex-wrap: wrap; }
+        .player { border: 1px solid #ccc; padding: 10px; margin: 10px; width: 250px; text-align: center; }
+        .hand { min-height: 100px; border: 1px dashed gray; display: flex; flex-wrap: wrap; justify-content: center; }
+        .incoming { min-height: 80px; border: 1px dotted blue; margin: 10px 0; text-align: center; display: flex; align-items: center; justify-content: center; }
+        .card { width: 50px; height: 70px; margin: 5px; border: 1px solid black; text-align: center; line-height: 70px; cursor: grab; }
+        .card.red { color: red; background: white; }
+        .card.black { color: black; background: white; }
+        .back { background: linear-gradient(45deg, #000080, #0000FF); color: white; text-align: center; line-height: 70px; font-size: 12px; }
+        .spoon[draggable], .card[draggable] { cursor: grab; }
+        .spoon[draggable=false], .card[draggable=false] { cursor: not-allowed; opacity: 0.5; }
+        button { padding: 10px 20px; margin: 20px; font-size: 16px; }
+    </style>
+</head>
+<body>
+    <h1>Improved Spoons Demo</h1>
+    <div id="setup">
+        <label for="numPlayers">Number of Players (4-12):</label>
+        <select id="numPlayers">
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10</option>
+            <option value="11">11</option>
+            <option value="12">12</option>
+        </select>
+        <button onclick="startGame()">Start Game</button>
+    </div>
+    <p id="instructions">You are "You". The dealer AI will automatically draw and pass cards around the circle. When a face-down card appears in your "Incoming" area, drag it to your "Hand" area to add and reveal it. Then, immediately drag one card from your hand to the next player's (Right Neighbor) "Incoming" area to pass it (it will become face-down for them).</p>
+    <p id="instructions2">When someone gets four of a kind, the spoons (🥄) become draggable—quickly drag one to your "Hand" area to grab it! AI players will try to grab too. The player without a spoon gets a letter toward "S-P-O-O-N-S".</p>
+    <p id="instructions3">Opponent hands show backs only. Game runs in real-time with AI delays simulating speed. Only your neighbors are shown; others are simulated.</p>
+    <div id="table" style="display:none;">
+        <div>Draw pile: <span id="drawCount"></span></div>
+        <div>Discard pile: <span id="discardCount"></span></div>
+        <div>Spoons: <div id="spoons"></div></div>
+    </div>
+    <div id="players" style="display:none;"></div>
+
+    <script>
+        let numPlayers = 4;
+        let userIndex = 1;
+        let drawPile = [];
+        let discardPile = [];
+        let players = [];
+        let spoons = [];
+        let gameOver = false;
+
+        const suits = ["spades", "diamonds", "clubs", "hearts"];
+        const values = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"];
+
+        function getDeck() {
+            let deck = [];
+            for (let suit of suits) {
+                for (let value of values) {
+                    deck.push({ Value: value, Suit: suit });
+                }
+            }
+            return deck;
+        }
+
+        function shuffle(deck) {
+            for (let i = deck.length - 1; i > 0; i--) {
+                let j = Math.floor(Math.random() * (i + 1));
+                [deck[i], deck[j]] = [deck[j], deck[i]];
+            }
+        }
+
+        function getSuitSymbol(suit) {
+            return suit === "spades" ? "♠" : suit === "hearts" ? "♥" : suit === "diamonds" ? "♦" : "♣";
+        }
+
+        function getMaxGroup(hand) {
+            let counts = {};
+            hand.forEach(card => {
+                counts[card.Value] = (counts[card.Value] || 0) + 1;
+            });
+            return Math.max(0, ...Object.values(counts));
+        }
+
+        function aiChooseDiscard(hand) {
+            let bestMax = 0;
+            let bestDiscards = [];
+            for (let i = 0; i < hand.length; i++) {
+                let temp = [...hand];
+                temp.splice(i, 1);
+                let maxGroup = getMaxGroup(temp);
+                if (maxGroup > bestMax) {
+                    bestMax = maxGroup;
+                    bestDiscards = [hand[i]];
+                } else if (maxGroup === bestMax) {
+                    bestDiscards.push(hand[i]);
+                }
+            }
+            return bestDiscards[Math.floor(Math.random() * bestDiscards.length)];
+        }
+
+        function checkFourOfKind(player, playerIndex) {
+            if (getMaxGroup(player.hand) === 4 && !gameOver) {
+                gameOver = true;
+                new Audio('https://www.myinstants.com/media/sounds/ding.mp3').play().catch(() => {});
+                spoons.forEach(s => {
+                    let spoonElem = document.getElementById(`spoon${s}`);
+                    spoonElem.setAttribute("draggable", "true");
+                });
+                if (!player.isUser) {
+                    setTimeout(() => tryGrabSpoon(playerIndex), Math.random() * 3000 + 2000);
+                }
+                setTimeout(() => {
+                    Array.from({length: numPlayers}, (_, i) => i).filter(i => i !== playerIndex && !players[i].isUser).forEach(i => {
+                        setTimeout(() => tryGrabSpoon(i), Math.random() * 3000 + 2000);
+                    });
+                }, 500);
+            }
+        }
+
+        function tryGrabSpoon(playerIndex) {
+            if (gameOver && spoons.length > 0) {
+                let spoonId = spoons.shift();
+                let player = players[playerIndex];
+                player.hasSpoon = true;
+                document.getElementById(`spoon${spoonId}`).remove();
+                if (isVisiblePlayer(playerIndex)) {
+                    document.getElementById(`hand${playerIndex}`).innerHTML += `<div>🥄</div>`;
+                }
+                new Audio('https://www.myinstants.com/media/sounds/click.mp3').play().catch(() => {});
+                checkRoundEnd();
+            }
+        }
+
+        function checkRoundEnd() {
+            if (spoons.length === 0 && gameOver) {
+                let loserIndex = players.findIndex(p => !p.hasSpoon);
+                if (loserIndex !== -1) {
+                    let loser = players[loserIndex];
+                    loser.score += loser.score.length < 6 ? "SPOONS"[loser.score.length] : "";
+                    updateDisplay();
+                    alert(`Round over! ${loser.name} gets a letter: ${loser.score}. Click "Restart Round" to play again.`);
+                    let restartBtn = document.createElement('button');
+                    restartBtn.innerText = 'Restart Round';
+                    restartBtn.onclick = () => {
+                        resetRound();
+                        updateDisplay();
+                        players.forEach((p, i) => {
+                            if (!p.isUser) aiAction(i);
+                        });
+                        restartBtn.remove();
+                    };
+                    document.body.appendChild(restartBtn);
+                }
+            }
+        }
+
+        function startGame() {
+            numPlayers = parseInt(document.getElementById('numPlayers').value);
+            userIndex = 1;
+            players = Array.from({length: numPlayers}, (_, i) => ({
+                name: i === userIndex ? "You" : `Player ${i + 1} (AI)`,
+                hand: [],
+                incoming: [],
+                isUser: i === userIndex,
+                score: "",
+                hasSpoon: false
+            }));
+            spoons = Array.from({length: numPlayers - 1}, (_, i) => i + 1);
+            document.getElementById('setup').style.display = 'none';
+            document.getElementById('instructions').style.display = 'none';
+            document.getElementById('instructions2').style.display = 'none';
+            document.getElementById('instructions3').style.display = 'none';
+            document.getElementById('table').style.display = 'flex';
+            document.getElementById('players').style.display = 'flex';
+            const playersDiv = document.getElementById('players');
+            playersDiv.innerHTML = '';
+            getVisibleIndices().forEach(visIndex => {
+                let displayName = visIndex === userIndex ? "You" : visIndex === (userIndex - 1 + numPlayers) % numPlayers ? "Left Neighbor" : "Right Neighbor";
+                let playerDiv = document.createElement('div');
+                playerDiv.classList.add('player');
+                playerDiv.id = `player${visIndex}`;
+                playersDiv.appendChild(playerDiv);
+            });
+            resetRound();
+            updateDisplay();
+            players.forEach((p, i) => {
+                if (!p.isUser) aiAction(i);
+            });
+        }
+
+        function getVisibleIndices() {
+            let left = (userIndex - 1 + numPlayers) % numPlayers;
+            let right = (userIndex + 1) % numPlayers;
+            return [left, userIndex, right];
+        }
+
+        function isVisiblePlayer(index) {
+            return getVisibleIndices().includes(index);
+        }
+
+        function resetRound() {
+            drawPile = getDeck();
+            shuffle(drawPile);
+            discardPile = [];
+            players.forEach(p => {
+                p.hand = [];
+                p.incoming = [];
+                p.hasSpoon = false;
+                for (let i = 0; i = 4; i++) {
+                    p.hand.push(drawPile.pop());
+                }
+            });
+            players[0].incoming.push(drawPile.pop());
+            spoons = Array.from({length: numPlayers - 1}, (_, i) => i + 1);
+            gameOver = false;
+            getVisibleIndices().forEach(visIndex => {
+                let playerDiv = document.getElementById(`player${visIndex}`);
+                playerDiv.innerHTML = `<h2>${visIndex === userIndex ? "You" : visIndex === (userIndex - 1 + numPlayers) % numPlayers ? "Left Neighbor" : "Right Neighbor"} (${players[visIndex].score || "No letters"})</h2><div class="incoming" id="incoming${visIndex}">Incoming</div><div class="hand" id="hand${visIndex}">Hand</div>`;
+            });
+        }
+
+        function updateDisplay() {
+            document.getElementById('drawCount').innerText = drawPile.length;
+            document.getElementById('discardCount').innerText = discardPile.length;
+            let spoonsDiv = document.getElementById('spoons');
+            spoonsDiv.innerHTML = '';
+            spoons.forEach(s => {
+                let spoon = document.createElement('span');
+                spoon.id = `spoon${s}`;
+                spoon.className = 'spoon';
+                spoon.innerText = '🥄';
+                spoon.setAttribute("draggable", gameOver ? "true" : "false");
+                spoon.ondragstart = (e) => {
+                    if (!gameOver) return;
+                    e.dataTransfer.setData("spoon", s);
+                };
+                enableTouchDrag(spoon);
+                spoonsDiv.appendChild(spoon);
+            });
+            getVisibleIndices().forEach(visIndex => {
+                let p = players[visIndex];
+                let playerDiv = document.getElementById(`player${visIndex}`);
+                let handDiv = document.getElementById(`hand${visIndex}`);
+                let incomingDiv = document.getElementById(`incoming${visIndex}`);
+                handDiv.innerHTML = '';
+                incomingDiv.innerHTML = 'Incoming';
+                if (p.isUser) {
+                    let sortedHand = [...p.hand].sort((a, b) => values.indexOf(a.Value) - values.indexOf(b.Value));
+                    sortedHand.forEach(card => {
+                        let cardDiv = document.createElement('div');
+                        cardDiv.className = `card ${card.Suit === 'hearts' || card.Suit === 'diamonds' ? 'red' : 'black'}`;
+                        cardDiv.innerText = `${card.Value}${getSuitSymbol(card.Suit)}`;
+                        cardDiv.setAttribute("draggable", p.incoming.length === 0 ? "false" : "true");
+                        cardDiv.ondragstart = (e) => {
+                            e.dataTransfer.setData("card", JSON.stringify(card));
+                            e.dataTransfer.setData("player", visIndex);
+                        };
+                        enableTouchDrag(cardDiv);
+                        handDiv.appendChild(cardDiv);
+                    });
+                } else {
+                    for (let j = 0; j < p.hand.length; j++) {
+                        let cardDiv = document.createElement('div');
+                        cardDiv.className = 'card back';
+                        cardDiv.innerText = 'BACK';
+                        cardDiv.setAttribute("draggable", false);
+                        handDiv.appendChild(cardDiv);
+                    }
+                }
+                if (p.incoming.length > 0) {
+                    let cardDiv = document.createElement('div');
+                    cardDiv.className = 'card back';
+                    cardDiv.innerText = 'BACK';
+                    if (p.incoming.length > 1) {
+                        cardDiv.innerText += ` (${p.incoming.length})`;
+                    }
+                    cardDiv.setAttribute("draggable", p.isUser ? "true" : "false");
+                    cardDiv.ondragstart = (e) => {
+                        e.dataTransfer.setData("card", JSON.stringify(p.incoming[0]));
+                        e.dataTransfer.setData("player", visIndex);
+                    };
+                    enableTouchDrag(cardDiv);
+                    incomingDiv.innerHTML = '';
+                    incomingDiv.appendChild(cardDiv);
+                }
+                if (p.hasSpoon) {
+                    handDiv.innerHTML += `<div>🥄</div>`;
+                }
+                handDiv.ondragover = (e) => e.preventDefault();
+                incomingDiv.ondragover = (e) => e.preventDefault();
+                incomingDiv.ondrop = (e) => {
+                    e.preventDefault();
+                    let cardStr = e.dataTransfer.getData("card");
+                    if (!cardStr) return;
+                    let card = JSON.parse(cardStr);
+                    let fromPlayer = parseInt(e.dataTransfer.getData("player"));
+                    let prevIndex = (visIndex + numPlayers - 1) % numPlayers;
+                    if (fromPlayer === prevIndex) {
+                        p.incoming.push(card);
+                        players[fromPlayer].hand = players[fromPlayer].hand.filter(c => c.Value !== card.Value || c.Suit !== card.Suit);
+                        updateDisplay();
+                    }
+                };
+                handDiv.ondrop = (e) => {
+                    e.preventDefault();
+                    let cardStr = e.dataTransfer.getData("card");
+                    let spoon = e.dataTransfer.getData("spoon");
+                    if (spoon && gameOver) {
+                        let spoonId = parseInt(spoon);
+                        if (spoons.includes(spoonId)) {
+                            spoons = spoons.filter(s => s !== spoonId);
+                            document.getElementById(`spoon${spoonId}`).remove();
+                            p.hasSpoon = true;
+                            updateDisplay();
+                            checkRoundEnd();
+                        }
+                    } else if (cardStr) {
+                        let card = JSON.parse(cardStr);
+                        let fromPlayer = parseInt(e.dataTransfer.getData("player"));
+                        if (fromPlayer === visIndex && p.isUser && p.incoming.length > 0 && p.hand.length < 5) {
+                            p.hand.push(p.incoming.shift());
+                            checkFourOfKind(p, visIndex);
+                            updateDisplay();
+                        }
+                    }
+                };
+            });
+        }
+
+        function aiAction(playerIndex) {
+            if (gameOver) return;
+            let p = players[playerIndex];
+            if (p.incoming.length > 0) {
+                setTimeout(() => {
+                    p.hand.push(p.incoming.shift());
+                    checkFourOfKind(p, playerIndex);
+                    let discard = aiChooseDiscard(p.hand);
+                    p.hand = p.hand.filter(c => c.Value !== discard.Value || c.Suit !== discard.Suit);
+                    let nextIndex = (playerIndex + 1) % numPlayers;
+                    if (nextIndex === 0) {
+                        discardPile.push(discard);
+                    } else {
+                        players[nextIndex].incoming.push(discard);
+                    }
+                    updateDisplay();
+                    if (playerIndex === 0 && !gameOver) {
+                        if (drawPile.length === 0) {
+                            drawPile = discardPile;
+                            discardPile = [];
+                            shuffle(drawPile);
+                        }
+                        p.incoming.push(drawPile.pop());
+                        updateDisplay();
+                    }
+                    if (!gameOver) {
+                        setTimeout(() => aiAction(playerIndex), Math.random() * 2000 + 1000);
+                    }
+                }, Math.random() * 2000 + 1000);
+            } else {
+                setTimeout(() => aiAction(playerIndex), Math.random() * 2000 + 1000);
+            }
+        }
+
+        function enableTouchDrag(element) {
+            element.addEventListener('touchstart', touchHandler, {passive: false});
+            element.addEventListener('touchmove', touchHandler, {passive: false});
+            element.addEventListener('touchend', touchHandler, {passive: false});
+        }
+
+        function touchHandler(event) {
+            var touch = event.changedTouches[0];
+            var simulatedEvent = document.createEvent("MouseEvent");
+            simulatedEvent.initMouseEvent({
+                touchstart: "mousedown",
+                touchmove: "mousemove",
+                touchend: "mouseup"
+            }[event.type], true, true, window, 1,
+                touch.screenX, touch.screenY,
+                touch.clientX, touch.clientY, false,
+                false, false, false, 0, null);
+
+            touch.target.dispatchEvent(simulatedEvent);
+            event.preventDefault();
+        }
+    </script>
+</body>
+</html>
