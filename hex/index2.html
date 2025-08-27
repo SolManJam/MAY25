@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Hex Mask</title>
+    <style>
+        html {
+            height: 100%;
+        }
+        body {
+            margin: 0;
+            width: 100vw;
+            overflow: hidden;
+            background-color: black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #grid {
+            position: relative;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        .hex {
+            position: absolute;
+            background-color: black;
+            clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+        }
+        .clickable {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        function updateVH() {
+            let vh = window.innerHeight * 0.01;
+            document.documentElement.style.setProperty('--vh', `${vh}px`);
+            document.body.style.height = `calc(var(--vh) * 100)`;
+        }
+        updateVH();
+        const s = 50;
+        const width = 2 * s;
+        const height = Math.sqrt(3) * s;
+        const gap = 4;
+        const h_space = 3 * s + gap;
+        const v_space = (Math.sqrt(3) / 2) * s + gap;
+        const offset = h_space / 2;
+        const min_i = -1;
+        const max_i = 9;
+        const images = ['1.jpg', '2.jpg'];
+        const randomImage = images[Math.floor(Math.random() * images.length)];
+        const total_width = (7 * h_space) + width;
+        const total_height = ((max_i - min_i) * v_space) + height;
+        const grid = document.createElement('div');
+        grid.id = 'grid';
+        grid.style.width = `${total_width}px`;
+        grid.style.height = `${total_height}px`;
+        grid.style.backgroundImage = `url('wallpapers/${randomImage}')`;
+        document.body.appendChild(grid);
+        const base_x = s;
+        const base_y = height / 2 + (-min_i) * v_space;
+        let hex_num = 1;
+        for (let i = min_i; i <= max_i; i++) {
+            let i_mod = ((i % 2) + 2) % 2;
+            let cols = (i_mod === 0) ? 8 : 7;
+            let row_offset = (i_mod === 0) ? 0 : offset;
+            let center_y = base_y + i * v_space;
+            for (let j = 0; j < cols; j++) {
+                let center_x = base_x + j * h_space + row_offset;
+                let left = center_x - s;
+                let top = center_y - height / 2;
+                const is_clickable = (i >= 0 && i < 9 && j >= 1 && j < cols - 1);
+                if (is_clickable) {
+                    // Bottom hex with number
+                    let bottom_hex = document.createElement('div');
+                    bottom_hex.className = 'hex';
+                    bottom_hex.style.width = `${width}px`;
+                    bottom_hex.style.height = `${height}px`;
+                    bottom_hex.style.left = `${left}px`;
+                    bottom_hex.style.top = `${top}px`;
+                    bottom_hex.style.zIndex = '1';
+                    // Add number
+                    let number_div = document.createElement('div');
+                    number_div.textContent = `${hex_num}`;
+                    number_div.style.position = 'absolute';
+                    number_div.style.left = '50%';
+                    number_div.style.top = '50%';
+                    number_div.style.transform = 'translate(-50%, -50%)';
+                    number_div.style.fontSize = '50px';
+                    number_div.style.color = '#00BFFF';
+                    number_div.style.zIndex = '2';
+                    bottom_hex.appendChild(number_div);
+                    grid.appendChild(bottom_hex);
+                    // Top hex (clickable)
+                    let top_hex = document.createElement('div');
+                    top_hex.className = 'hex clickable';
+                    top_hex.style.width = `${width}px`;
+                    top_hex.style.height = `${height}px`;
+                    top_hex.style.left = `${left}px`;
+                    top_hex.style.top = `${top}px`;
+                    top_hex.style.zIndex = '3';
+                    top_hex.addEventListener('click', function() {
+                        this.style.backgroundColor = 'transparent';
+                    });
+                    grid.appendChild(top_hex);
+                    hex_num++;
+                } else {
+                    // Non-clickable hex
+                    let hex = document.createElement('div');
+                    hex.className = 'hex';
+                    hex.style.width = `${width}px`;
+                    hex.style.height = `${height}px`;
+                    hex.style.left = `${left}px`;
+                    hex.style.top = `${top}px`;
+                    hex.style.zIndex = '1';
+                    grid.appendChild(hex);
+                }
+            }
+        }
+        const y_shift = (Math.sqrt(3) / 2) * s;
+        const x_shift = 3 * s + gap / 2;
+        const top_frame = document.createElement('div');
+        top_frame.style.position = 'absolute';
+        top_frame.style.left = '0px';
+        top_frame.style.top = '0px';
+        top_frame.style.width = `${total_width}px`;
+        top_frame.style.height = `${y_shift}px`;
+        top_frame.style.backgroundColor = 'black';
+        top_frame.style.zIndex = '4';
+        grid.appendChild(top_frame);
+        const bottom_frame = document.createElement('div');
+        bottom_frame.style.position = 'absolute';
+        bottom_frame.style.left = '0px';
+        bottom_frame.style.top = `${total_height - y_shift}px`;
+        bottom_frame.style.width = `${total_width}px`;
+        bottom_frame.style.height = `${y_shift}px`;
+        bottom_frame.style.backgroundColor = 'black';
+        bottom_frame.style.zIndex = '4';
+        grid.appendChild(bottom_frame);
+        const left_frame = document.createElement('div');
+        left_frame.style.position = 'absolute';
+        left_frame.style.left = '0px';
+        left_frame.style.top = '0px';
+        left_frame.style.width = `${x_shift}px`;
+        left_frame.style.height = `${total_height}px`;
+        left_frame.style.backgroundColor = 'black';
+        left_frame.style.zIndex = '4';
+        grid.appendChild(left_frame);
+        const right_frame = document.createElement('div');
+        right_frame.style.position = 'absolute';
+        right_frame.style.left = `${total_width - x_shift}px`;
+        right_frame.style.top = '0px';
+        right_frame.style.width = `${x_shift}px`;
+        right_frame.style.height = `${total_height}px`;
+        right_frame.style.backgroundColor = 'black';
+        right_frame.style.zIndex = '4';
+        grid.appendChild(right_frame);
+        const emoji_size = 25;
+        const half_emoji = emoji_size / 2;
+        const padding = gap + half_emoji;
+        const emojis = [];
+        for (let i = 0; i < 90; i++) {
+            let emoji = document.createElement('div');
+            emoji.textContent = `${i+1}`;
+            emoji.style.position = 'absolute';
+            emoji.style.fontSize = `${emoji_size}px`;
+            emoji.style.color = '#FF4500';
+            emoji.style.zIndex = '10';
+            document.body.appendChild(emoji);
+            emojis.push(emoji);
+        }
+        function positionEmojis() {
+            const isPortrait = window.innerWidth < window.innerHeight;
+            const rect_w = window.innerWidth - 2 * padding;
+            const rect_h = window.innerHeight - 2 * padding;
+            const perimeter = 2 * (rect_w + rect_h);
+            const step = perimeter / 90;
+            for (let i = 0; i < 90; i++) {
+                let dist = (i + 0.5) * step;
+                let em_x, em_y;
+                let rot = 0;
+                if (dist < rect_w) {
+                    em_x = padding + dist;
+                    em_y = padding;
+                } else if (dist < rect_w + rect_h) {
+                    em_x = padding + rect_w;
+                    em_y = padding + (dist - rect_w);
+                    if (isPortrait) rot = 90;
+                } else if (dist < 2 * rect_w + rect_h) {
+                    em_x = padding + rect_w - (dist - rect_w - rect_h);
+                    em_y = padding + rect_h;
+                } else {
+                    em_x = padding;
+                    em_y = padding + rect_h - (dist - 2 * rect_w - rect_h);
+                    if (isPortrait) rot = -90;
+                }
+                emojis[i].style.left = `${em_x}px`;
+                emojis[i].style.top = `${em_y}px`;
+                emojis[i].style.transform = `translate(-50%, -50%) rotate(${rot}deg)`;
+            }
+        }
+        positionEmojis();
+        window.addEventListener('resize', () => {
+            updateVH();
+            positionEmojis();
+            updateGridScale();
+        });
+        function updateGridScale() {
+            const scale = Math.min(window.innerWidth / total_width, window.innerHeight / total_height);
+            grid.style.transform = `scale(${scale})`;
+        }
+        updateGridScale();
+    </script>
+</body>
+</html>
